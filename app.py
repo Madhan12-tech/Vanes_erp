@@ -74,6 +74,19 @@ def forgot():
         flash("OTP sent to your email (simulation).", "info")
     return render_template('forgot.html')
 
+@app.route('/vendors')
+def vendors():
+    if 'username' not in session:
+        flash("Login required", "warning")
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM vendors")
+    data = c.fetchall()
+    conn.close()
+    return render_template("vendors.html", vendors=data)
+
 # ---------- Run ----------
 if __name__ == '__main__':
     init_db()
