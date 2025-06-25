@@ -87,6 +87,42 @@ def vendors():
     conn.close()
     return render_template("vendors.html", vendors=data)
 
+@app.route('/edit/<int:vendor_id>', methods=['GET', 'POST'])
+def edit(vendor_id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+
+    if request.method == 'POST':
+        fields = (
+            request.form['company_name'],
+            request.form['email'],
+            request.form['office_mobile'],
+            vendor_id
+        )
+        c.execute('''
+            UPDATE vendors SET company_name=?, email=?, office_mobile=? WHERE id=?
+        ''', fields)
+        conn.commit()
+        conn.close()
+        flash("Vendor updated!", "success")
+        return redirect(url_for('vendors'))
+
+    # GET request
+    c.execute("SELECT * FROM vendors WHERE id=?", (vendor_id,))
+    vendor = c.fetchone()
+    conn.close()
+    return render_template('edit_vendor.html', vendor=vendor)
+
+@app.route('/delete/<int:vendor_id>')
+def delete(vendor_id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM vendors WHERE id=?", (vendor_id,))
+    conn.commit()
+    conn.close()
+    flash("Vendor deleted!", "info")
+    return redirect(url_for('vendors'))
+
 # ---------- Run ----------
 if __name__ == '__main__':
     init_db()
