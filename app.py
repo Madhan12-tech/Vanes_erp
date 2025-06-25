@@ -59,6 +59,58 @@ def login():
             flash('Invalid credentials.', 'danger')
     return render_template('login.html')
 
+@app.route('/dashboard')
+def dashboard():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    
+    modules = [
+        {"name": "Management", "url": "/management"},
+        {"name": "Accounts", "url": "/accounts"},
+        {"name": "Project", "url": "/project"},
+        {"name": "Production", "url": "/production"},
+        {"name": "Sales / Design", "url": "/sales"},
+        {"name": "Customer", "url": "/customer"}
+    ]
+    return render_template("dashboard.html", modules=modules)
+
+# ✅ Paste these below dashboard route
+@app.route('/management')
+def management():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template("management.html")
+
+@app.route('/accounts')
+def accounts():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template("accounts.html")
+
+@app.route('/project')
+def project():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template("project.html")
+
+@app.route('/production')
+def production():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template("production.html")
+
+@app.route('/sales')
+def sales():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template("sales.html")
+
+@app.route('/customer')
+def customer():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template("customer.html")
+
 @app.route('/forgot', methods=['GET', 'POST'])
 def forgot():
     if request.method == 'POST':
