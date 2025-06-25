@@ -1,5 +1,8 @@
 from flask import Flask, render_template, request, redirect, url_for, flash
 import sqlite3
+from flask import send_file
+import openpyxl
+from io import BytesIO
 
 app = Flask(__name__)
 app.secret_key = 'vanes_secret_key'
@@ -122,6 +125,43 @@ def delete(vendor_id):
     conn.close()
     flash("Vendor deleted!", "info")
     return redirect(url_for('vendors'))
+
+@app.route('/export')
+def export():
+    if 'username' not in session:
+        flash("Login required", "warning")
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM vendors")
+    data = c.fetchall()
+    conn.close()
+
+    # Create Excel workbook
+    wb = openpyxl.Workbook()
+    ws = wb.active
+    ws.title = "Vendors"
+
+    # Column titles
+    headers = [
+        "ID", "Vendor ID", "Company Name", "Company Address", "Office Mobile",
+        "Office Telephone", "Email", "GSTIN", "PAN", "TAN",
+        "Contact 1 Name", "Contact 1 Dept", "Contact 1 Designation", "Contact 1 Mobile",
+        "Contact 2 Name", "Contact 2 Dept", "Contact 2 Designation", "Contact 2 Mobile",
+        "Bank Name", "Account Number", "Account Type", "Bank", "IFSC", "MICR"
+    ]
+    ws.append(headers)
+
+    for row in data:
+        ws.append(row)
+
+    # Save to memory
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+
+    return send_file(output, as_attachment=True, download_name="vendors.xlsx", mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 # ---------- Run ----------
 if __name__ == '__main__':
