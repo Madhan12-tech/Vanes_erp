@@ -1,148 +1,155 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Vendor Registration</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
-  <div class="container mt-4">
-    <h2 class="mb-4 text-center">Vendor Registration</h2>
 
-    <form method="POST" action="/register">
-      <!-- Basic Info -->
-      <div class="mb-3">
-        <label>Vendor ID</label>
-        <input type="text" name="vendor_id" class="form-control" required>
-      </div>
+<div class="container py-5">
+  <h2 class="mb-4 text-center">Vendor Registration</h2>
+  <form method="POST">
 
-      <div class="mb-3">
-        <label>Company Name</label>
-        <input type="text" name="company_name" class="form-control" required>
-      </div>
+    <div class="accordion" id="vendorAccordion">
 
-      <div class="mb-3">
-        <label>Company Address</label>
-        <textarea name="company_address" class="form-control" required></textarea>
-      </div>
-
-      <!-- Accordion Starts -->
-      <div class="accordion" id="accordionSections">
-
-        <!-- Communication Details -->
-        <div class="accordion-item">
-          <h2 class="accordion-header" id="commHeading">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#commCollapse">
-              Communication Details
-            </button>
-          </h2>
-          <div id="commCollapse" class="accordion-collapse collapse" data-bs-parent="#accordionSections">
-            <div class="accordion-body">
-
-              <div class="row g-2">
-                <div class="col-md-3">
-                  <label>Name</label>
-                  <input type="text" name="name1" class="form-control">
-                </div>
-                <div class="col-md-3">
-                  <label>Department</label>
-                  <input type="text" name="dept1" class="form-control">
-                </div>
-                <div class="col-md-3">
-                  <label>Designation</label>
-                  <input type="text" name="desg1" class="form-control">
-                </div>
-                <div class="col-md-3">
-                  <label>Mobile</label>
-                  <input type="text" name="mob1" class="form-control">
-                </div>
+      <!-- Vendor Details -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="vendorDetailsHeading">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#vendorDetails" aria-expanded="true">
+            Vendor Details
+          </button>
+        </h2>
+        <div id="vendorDetails" class="accordion-collapse collapse show" data-bs-parent="#vendorAccordion">
+          <div class="accordion-body">
+            <div class="mb-3">
+              <label class="form-label">Vendor ID</label>
+              <input type="text" name="vendor_id" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Company Name</label>
+              <input type="text" name="company_name" class="form-control" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Company Address</label>
+              <textarea name="company_address" class="form-control" rows="2" required></textarea>
+            </div>
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Office Mobile</label>
+                <input type="text" name="office_mobile" class="form-control">
               </div>
-
-              <!-- + Button for additional contact (JavaScript needed if you want more) -->
-              <!-- Optional: You can add dynamic fields later -->
-
+              <div class="col-md-6 mb-3">
+                <label class="form-label">Office Telephone</label>
+                <input type="text" name="office_telephone" class="form-control">
+              </div>
+            </div>
+            <div class="mb-3">
+              <label class="form-label">Email</label>
+              <input type="email" name="email" class="form-control">
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label class="form-label">GSTIN</label>
+                <input type="text" name="gstin" class="form-control">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">PAN</label>
+                <input type="text" name="pan" class="form-control">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label class="form-label">TAN</label>
+                <input type="text" name="tan" class="form-control">
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <!-- Bank Details -->
-        <div class="accordion-item mt-3">
-          <h2 class="accordion-header" id="bankHeading">
-            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bankCollapse">
-              Bank Details
-            </button>
-          </h2>
-          <div id="bankCollapse" class="accordion-collapse collapse" data-bs-parent="#accordionSections">
-            <div class="accordion-body">
-
-              <div class="row g-2">
-                <div class="col-md-4">
-                  <label>Beneficiary Name</label>
-                  <input type="text" name="ben_name" class="form-control">
-                </div>
-                <div class="col-md-4">
-                  <label>Account Number</label>
-                  <input type="text" name="ben_ac" class="form-control">
-                </div>
-                <div class="col-md-4">
-                  <label>Account Type</label>
-                  <input type="text" name="ac_type" class="form-control">
-                </div>
-                <div class="col-md-4">
-                  <label>Bank Name</label>
-                  <input type="text" name="bank_name" class="form-control">
-                </div>
-                <div class="col-md-4">
-                  <label>IFSC</label>
-                  <input type="text" name="ifsc" class="form-control">
-                </div>
-                <div class="col-md-4">
-                  <label>MICR</label>
-                  <input type="text" name="micr" class="form-control">
-                </div>
+      <!-- Communication Details -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="commDetailsHeading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#commDetails">
+            Communication Details
+          </button>
+        </h2>
+        <div id="commDetails" class="accordion-collapse collapse" data-bs-parent="#vendorAccordion">
+          <div class="accordion-body">
+            <div class="row">
+              <div class="col-md-3 mb-3">
+                <label>Name</label>
+                <input type="text" name="name1" class="form-control">
               </div>
-
+              <div class="col-md-3 mb-3">
+                <label>Department</label>
+                <input type="text" name="dept1" class="form-control">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label>Designation</label>
+                <input type="text" name="desg1" class="form-control">
+              </div>
+              <div class="col-md-3 mb-3">
+                <label>Mobile</label>
+                <input type="text" name="mob1" class="form-control">
+              </div>
             </div>
           </div>
         </div>
-
-      </div>
-      <!-- Accordion Ends -->
-
-      <!-- Other Info -->
-      <div class="mt-3">
-        <label>Office Mobile</label>
-        <input type="text" name="office_mobile" class="form-control">
-      </div>
-      <div class="mt-3">
-        <label>Office Telephone</label>
-        <input type="text" name="office_telephone" class="form-control">
-      </div>
-      <div class="mt-3">
-        <label>Email</label>
-        <input type="email" name="email" class="form-control">
-      </div>
-      <div class="mt-3">
-        <label>GSTIN</label>
-        <input type="text" name="gstin" class="form-control">
-      </div>
-      <div class="mt-3">
-        <label>PAN</label>
-        <input type="text" name="pan" class="form-control">
-      </div>
-      <div class="mt-3">
-        <label>TAN</label>
-        <input type="text" name="tan" class="form-control">
       </div>
 
-      <div class="mt-4 text-center">
-        <button type="submit" class="btn btn-success">Submit</button>
-        <a href="/" class="btn btn-secondary">Cancel</a>
+      <!-- Bank Details -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="bankDetailsHeading">
+          <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#bankDetails">
+            Bank Details
+          </button>
+        </h2>
+        <div id="bankDetails" class="accordion-collapse collapse" data-bs-parent="#vendorAccordion">
+          <div class="accordion-body">
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label>Beneficiary Name</label>
+                <input type="text" name="ben_name" class="form-control">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label>Account Number</label>
+                <input type="text" name="ben_ac" class="form-control">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label>Account Type</label>
+                <input type="text" name="ac_type" class="form-control">
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                <label>Bank Name</label>
+                <input type="text" name="bank_name" class="form-control">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label>IFSC</label>
+                <input type="text" name="ifsc" class="form-control">
+              </div>
+              <div class="col-md-4 mb-3">
+                <label>MICR</label>
+                <input type="text" name="micr" class="form-control">
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
-    </form>
-  </div>
+    </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- Submit Button -->
+    <div class="text-center mt-4">
+      <button type="submit" class="btn btn-primary">Submit</button>
+      <a href="/" class="btn btn-secondary">Cancel</a>
+    </div>
+
+  </form>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
