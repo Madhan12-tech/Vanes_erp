@@ -1,115 +1,112 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Vendor Registration</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .section-header {
-      cursor: pointer;
-      padding: 10px;
-      background-color: #e3f2fd;
-      border: 1px solid #90caf9;
-      border-radius: 5px;
-      margin-top: 20px;
-    }
-    .section-body {
-      padding: 15px;
-      border: 1px solid #90caf9;
-      border-top: none;
-      border-radius: 0 0 5px 5px;
-    }
-    .comm-row {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 10px;
-      flex-wrap: wrap;
-    }
-    .comm-row input {
-      flex: 1;
-    }
-  </style>
 </head>
 <body class="bg-light">
-<div class="container py-5">
-  <h2 class="mb-4 text-center">Vendor Registration</h2>
+<div class="container py-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Vendor Registration</h3>
+    <a href="{{ url_for('logout') }}" class="btn btn-outline-danger btn-sm">Logout</a>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
+          {{ message }}
+          <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+
   <form method="POST">
-    
-    <!-- Vendor Details Section -->
-    <div class="section-header" data-bs-toggle="collapse" data-bs-target="#vendor-details">Vendor Details</div>
-    <div id="vendor-details" class="collapse show section-body">
-      <div class="row">
-        <div class="col-md-4 mb-3"><input type="text" name="vendor_id" class="form-control" placeholder="Vendor ID" required></div>
-        <div class="col-md-4 mb-3"><input type="text" name="company_name" class="form-control" placeholder="Company Name" required></div>
-        <div class="col-md-4 mb-3"><input type="text" name="company_address" class="form-control" placeholder="Company Address" required></div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3"><input type="text" name="office_mobile" class="form-control" placeholder="Office Mobile"></div>
-        <div class="col-md-6 mb-3"><input type="text" name="office_telephone" class="form-control" placeholder="Office Telephone"></div>
-      </div>
-      <div class="row">
-        <div class="col-md-6 mb-3"><input type="email" name="email" class="form-control" placeholder="Email"></div>
-        <div class="col-md-6 mb-3"><input type="text" name="gstin" class="form-control" placeholder="GSTIN"></div>
-        <div class="col-md-6 mb-3"><input type="text" name="pan" class="form-control" placeholder="PAN"></div>
-        <div class="col-md-6 mb-3"><input type="text" name="tan" class="form-control" placeholder="TAN"></div>
+    <!-- Vendor Details (always visible) -->
+    <div class="card shadow mb-3">
+      <div class="card-header bg-primary text-white">Vendor Details</div>
+      <div class="card-body">
+        <div class="mb-2"><input type="text" name="vendor_id" class="form-control" placeholder="Vendor ID" required></div>
+        <div class="mb-2"><input type="text" name="company_name" class="form-control" placeholder="Company Name" required></div>
+        <div class="mb-2"><input type="text" name="company_address" class="form-control" placeholder="Company Address" required></div>
+        <div class="row mb-2">
+          <div class="col"><input type="text" name="office_mobile" class="form-control" placeholder="Office Mobile"></div>
+          <div class="col"><input type="text" name="office_telephone" class="form-control" placeholder="Office Telephone"></div>
+        </div>
+        <div class="row mb-2">
+          <div class="col"><input type="email" name="email" class="form-control" placeholder="Email"></div>
+          <div class="col"><input type="text" name="gstin" class="form-control" placeholder="GSTIN"></div>
+        </div>
+        <div class="row mb-2">
+          <div class="col"><input type="text" name="pan" class="form-control" placeholder="PAN"></div>
+          <div class="col"><input type="text" name="tan" class="form-control" placeholder="TAN"></div>
+        </div>
       </div>
     </div>
 
     <!-- Communication Details -->
-    <div class="section-header" data-bs-toggle="collapse" data-bs-target="#communication-section">Communication Details</div>
-    <div id="communication-section" class="collapse section-body">
-      <div id="comm-rows">
-        <div class="comm-row">
-          <input type="text" name="contact_name[]" placeholder="Name" class="form-control">
-          <input type="text" name="contact_dept[]" placeholder="Department" class="form-control">
-          <input type="text" name="contact_desg[]" placeholder="Designation" class="form-control">
-          <input type="text" name="contact_mob[]" placeholder="Mobile" class="form-control">
-          <button type="button" class="btn btn-danger btn-sm" onclick="removeCommRow(this)">−</button>
+    <div class="card shadow mb-3">
+      <div class="card-header bg-secondary text-white d-flex justify-content-between align-items-center">
+        <span>Communication Details</span>
+        <button type="button" class="btn btn-sm btn-light" onclick="addCommRow()">+ Add</button>
+      </div>
+      <div class="card-body" id="comm-rows">
+        <div class="row mb-2 comm-row">
+          <div class="col"><input type="text" name="contact_name[]" class="form-control" placeholder="Name"></div>
+          <div class="col"><input type="text" name="contact_dept[]" class="form-control" placeholder="Department"></div>
+          <div class="col"><input type="text" name="contact_desg[]" class="form-control" placeholder="Designation"></div>
+          <div class="col"><input type="text" name="contact_mob[]" class="form-control" placeholder="Mobile"></div>
+          <div class="col-auto">
+            <button type="button" class="btn btn-danger btn-sm" onclick="removeCommRow(this)">−</button>
+          </div>
         </div>
       </div>
-      <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addCommRow()">+ Add Contact</button>
     </div>
 
     <!-- Bank Details -->
-    <div class="section-header" data-bs-toggle="collapse" data-bs-target="#bank-section">Bank Details</div>
-    <div id="bank-section" class="collapse section-body">
-      <div class="row">
-        <div class="col-md-6 mb-3"><input type="text" name="ben_name" class="form-control" placeholder="Beneficiary Name"></div>
-        <div class="col-md-6 mb-3"><input type="text" name="ben_ac" class="form-control" placeholder="Account Number"></div>
-        <div class="col-md-4 mb-3"><input type="text" name="ac_type" class="form-control" placeholder="Account Type"></div>
-        <div class="col-md-4 mb-3"><input type="text" name="bank_name" class="form-control" placeholder="Bank Name"></div>
-        <div class="col-md-2 mb-3"><input type="text" name="ifsc" class="form-control" placeholder="IFSC"></div>
-        <div class="col-md-2 mb-3"><input type="text" name="micr" class="form-control" placeholder="MICR"></div>
+    <div class="card shadow mb-3">
+      <div class="card-header bg-success text-white">Bank Details</div>
+      <div class="card-body">
+        <div class="row mb-2">
+          <div class="col"><input type="text" name="ben_name" class="form-control" placeholder="Beneficiary Name"></div>
+          <div class="col"><input type="text" name="ben_ac" class="form-control" placeholder="Account Number"></div>
+        </div>
+        <div class="row mb-2">
+          <div class="col"><input type="text" name="ac_type" class="form-control" placeholder="Account Type"></div>
+          <div class="col"><input type="text" name="bank_name" class="form-control" placeholder="Bank Name"></div>
+          <div class="col"><input type="text" name="ifsc" class="form-control" placeholder="IFSC"></div>
+          <div class="col"><input type="text" name="micr" class="form-control" placeholder="MICR"></div>
+        </div>
       </div>
     </div>
 
-    <div class="text-center">
-      <button type="submit" class="btn btn-success mt-4">Submit</button>
-    </div>
-
+    <button type="submit" class="btn btn-primary">Register Vendor</button>
   </form>
 </div>
 
-<!-- Scripts -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-  function addCommRow() {
-    const row = document.createElement('div');
-    row.className = 'comm-row';
-    row.innerHTML = `
-      <input type="text" name="contact_name[]" placeholder="Name" class="form-control">
-      <input type="text" name="contact_dept[]" placeholder="Department" class="form-control">
-      <input type="text" name="contact_desg[]" placeholder="Designation" class="form-control">
-      <input type="text" name="contact_mob[]" placeholder="Mobile" class="form-control">
+function addCommRow() {
+  const container = document.getElementById('comm-rows');
+  const row = document.createElement('div');
+  row.className = 'row mb-2 comm-row';
+  row.innerHTML = `
+    <div class="col"><input type="text" name="contact_name[]" class="form-control" placeholder="Name"></div>
+    <div class="col"><input type="text" name="contact_dept[]" class="form-control" placeholder="Department"></div>
+    <div class="col"><input type="text" name="contact_desg[]" class="form-control" placeholder="Designation"></div>
+    <div class="col"><input type="text" name="contact_mob[]" class="form-control" placeholder="Mobile"></div>
+    <div class="col-auto">
       <button type="button" class="btn btn-danger btn-sm" onclick="removeCommRow(this)">−</button>
-    `;
-    document.getElementById('comm-rows').appendChild(row);
-  }
-
-  function removeCommRow(button) {
-    button.parentElement.remove();
-  }
+    </div>
+  `;
+  container.appendChild(row);
+}
+function removeCommRow(button) {
+  button.closest('.comm-row').remove();
+}
 </script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
