@@ -49,6 +49,19 @@ def login():
             flash('Invalid credentials.', 'danger')
     return render_template('login.html')
 
+@app.route('/forgot', methods=['GET', 'POST'])
+def forgot():
+    if request.method == 'POST':
+        flash("OTP sent to your email (simulation).", "info")
+    return render_template('forgot.html')
+    
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash("Logged out successfully.", "info")
+    return redirect(url_for('login'))
+
+
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
