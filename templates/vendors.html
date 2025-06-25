@@ -15,6 +15,7 @@
             <th>Email</th>
             <th>Mobile</th>
             <th>GSTIN</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -26,6 +27,10 @@
             <td>{{ v[6] }}</td>
             <td>{{ v[4] }}</td>
             <td>{{ v[7] }}</td>
+            <td>
+                <a href="/edit/{{ v[0] }}">Edit</a> |
+                <a href="/delete/{{ v[0] }}" onclick="return confirm('Delete this vendor?');">Delete</a>
+            </td>
         </tr>
         {% endfor %}
     </tbody>
