@@ -1,9 +1,7 @@
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
 import sqlite3
-from flask import send_file
 import openpyxl
 from io import BytesIO
-from flask import session
 
 app = Flask(__name__)
 app.secret_key = 'vanes_secret_key'
@@ -22,17 +20,13 @@ def init_db():
         ben_name TEXT, ben_ac TEXT, ac_type TEXT,
         bank_name TEXT, ifsc TEXT, micr TEXT
     )''')
-
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT, password TEXT
     )''')
-
-    # Insert default admin if not exists
     c.execute("SELECT * FROM users WHERE username='admin'")
     if not c.fetchone():
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", ('admin', 'admin123'))
-
     conn.commit()
     conn.close()
 
@@ -48,6 +42,7 @@ def login():
         user = c.fetchone()
         conn.close()
         if user:
+            session['username'] = uname
             flash('Login successful!', 'success')
             return redirect(url_for('register'))
         else:
@@ -72,18 +67,11 @@ def register():
         flash('Vendor registered successfully!', 'success')
     return render_template('register.html')
 
-@app.route('/forgot', methods=['GET', 'POST'])
-def forgot():
-    if request.method == 'POST':
-        flash("OTP sent to your email (simulation).", "info")
-    return render_template('forgot.html')
-
 @app.route('/vendors')
 def vendors():
     if 'username' not in session:
         flash("Login required", "warning")
         return redirect(url_for('login'))
-
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute("SELECT * FROM vendors")
@@ -91,77 +79,32 @@ def vendors():
     conn.close()
     return render_template("vendors.html", vendors=data)
 
-@app.route('/edit/<int:vendor_id>', methods=['GET', 'POST'])
-def edit(vendor_id):
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-
-    if request.method == 'POST':
-        fields = (
-            request.form['company_name'],
-            request.form['email'],
-            request.form['office_mobile'],
-            vendor_id
-        )
-        c.execute('''
-            UPDATE vendors SET company_name=?, email=?, office_mobile=? WHERE id=?
-        ''', fields)
-        conn.commit()
-        conn.close()
-        flash("Vendor updated!", "success")
-        return redirect(url_for('vendors'))
-
-    # GET request
-    c.execute("SELECT * FROM vendors WHERE id=?", (vendor_id,))
-    vendor = c.fetchone()
-    conn.close()
-    return render_template('edit_vendor.html', vendor=vendor)
-
-@app.route('/delete/<int:vendor_id>')
-def delete(vendor_id):
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("DELETE FROM vendors WHERE id=?", (vendor_id,))
-    conn.commit()
-    conn.close()
-    flash("Vendor deleted!", "info")
-    return redirect(url_for('vendors'))
-
 @app.route('/export')
 def export():
     if 'username' not in session:
         flash("Login required", "warning")
         return redirect(url_for('login'))
-
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute("SELECT * FROM vendors")
     data = c.fetchall()
     conn.close()
-
-    # Create Excel workbook
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Vendors"
-
-    # Column titles
     headers = [
         "ID", "Vendor ID", "Company Name", "Company Address", "Office Mobile",
         "Office Telephone", "Email", "GSTIN", "PAN", "TAN",
         "Contact 1 Name", "Contact 1 Dept", "Contact 1 Designation", "Contact 1 Mobile",
         "Contact 2 Name", "Contact 2 Dept", "Contact 2 Designation", "Contact 2 Mobile",
-        "Bank Name", "Account Number", "Account Type", "Bank", "IFSC", "MICR"
+        "Beneficiary Name", "Account Number", "Account Type", "Bank Name", "IFSC", "MICR"
     ]
     ws.append(headers)
-
     for row in data:
         ws.append(row)
-
-    # Save to memory
     output = BytesIO()
     wb.save(output)
     output.seek(0)
-
     return send_file(output, as_attachment=True, download_name="vendors.xlsx", mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
 # ---------- Run ----------
