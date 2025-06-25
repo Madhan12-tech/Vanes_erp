@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, flash, ses
 import sqlite3
 import openpyxl
 from io import BytesIO
+import random
 
 app = Flask(__name__)
 app.secret_key = 'vanes_secret_key'
@@ -11,7 +12,6 @@ def init_db():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     
-    # Vendor main table
     c.execute('''CREATE TABLE IF NOT EXISTS vendors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         vendor_id TEXT, company_name TEXT, company_address TEXT,
@@ -21,20 +21,17 @@ def init_db():
         bank_name TEXT, ifsc TEXT, micr TEXT
     )''')
 
-    # Communication table
     c.execute('''CREATE TABLE IF NOT EXISTS vendor_contacts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         vendor_id TEXT,
         name TEXT, dept TEXT, desg TEXT, mob TEXT
     )''')
 
-    # Login table
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT, password TEXT
     )''')
 
-    # Default user
     c.execute("SELECT * FROM users WHERE username='admin'")
     if not c.fetchone():
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", ('admin', 'admin123'))
@@ -43,6 +40,7 @@ def init_db():
     conn.close()
 
 # ---------- Routes ----------
+
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -60,6 +58,44 @@ def login():
         else:
             flash('Invalid credentials.', 'danger')
     return render_template('login.html')
+
+@app.route('/forgot', methods=['GET', 'POST'])
+def forgot():
+    if request.method == 'POST':
+        session['otp'] = str(random.randint(100000, 999999))
+        session['username_reset'] = request.form['username']
+        flash(f"OTP sent to your email: {session['otp']} (simulated)", "info")
+        return redirect(url_for('verify_otp'))
+    return render_template('forgot.html')
+
+@app.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp():
+    if request.method == 'POST':
+        entered = request.form['otp']
+        if 'otp' in session and entered == session['otp']:
+            flash("OTP verified! You can now reset your password.", "success")
+            return redirect(url_for('reset_password'))
+        else:
+            flash("Invalid OTP.", "danger")
+    return render_template('verify_otp.html')
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'POST':
+        new_pass = request.form['password']
+        username = session.get('username_reset')
+        if username:
+            conn = sqlite3.connect('database.db')
+            c = conn.cursor()
+            c.execute("UPDATE users SET password=? WHERE username=?", (new_pass, username))
+            conn.commit()
+            conn.close()
+            flash("Password updated. Please login.", "success")
+            return redirect(url_for('login'))
+        else:
+            flash("Session expired. Try again.", "danger")
+            return redirect(url_for('forgot'))
+    return render_template('reset_password.html')
 
 @app.route('/dashboard')
 def dashboard():
