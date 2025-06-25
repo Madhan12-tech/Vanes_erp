@@ -1,47 +1,86 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
   <title>New Enquiry</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    .section-box {
-      border: 2px solid #0d6efd;
-      border-radius: 10px;
+    h5 {
+      margin-bottom: 15px;
+      font-weight: bold;
+    }
+    .form-section {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
       padding: 20px;
       margin-bottom: 20px;
-      background-color: #f0f8ff;
-    }
-    .section-box h5 {
-      color: #0d6efd;
-      font-weight: 600;
+      background-color: #f8f9fa;
     }
   </style>
 </head>
 <body>
 <div class="container py-4">
-  <h2 class="mb-4 text-primary">New Enquiry</h2>
-  <form method="POST">
+  <h3 class="text-center mb-4 text-primary">New Enquiry Form</h3>
 
-    <!-- Enquiry ID -->
-    <div class="section-box">
-      <h5>Enquiry ID</h5>
-      <input type="text" class="form-control" name="enquiry_id" value="{{ enquiry_id }}" readonly>
+  <form method="POST" action="/new_enquiry" enctype="multipart/form-data">
+    <!-- Enquiry ID + Enquiry Type -->
+    <div class="row mb-3">
+      <div class="col-md-6">
+        <label class="form-label">Enquiry ID</label>
+        <input type="text" class="form-control" name="enquiry_id" value="{{ enquiry_id }}" readonly>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label">Enquiry Type</label>
+        <select class="form-select" name="enquiry_type" required>
+          <option value="">-- Select Type --</option>
+          <option value="Tender">Tender</option>
+          <option value="Enquiry">Enquiry</option>
+        </select>
+      </div>
     </div>
 
-    <!-- Owner Details -->
-    <div class="section-box">
-      <h5>Owner Details</h5>
+    <!-- Owner Section -->
+    <div class="form-section">
+      <h5 class="text-primary">Owner Details</h5>
       <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">Owner Name</label>
-          <input type="text" name="owner_name" class="form-control" required>
+          <input type="text" class="form-control" name="owner_name" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Company Name</label>
+          <input type="text" class="form-control" name="company_name">
+        </div>
+      </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="form-section">
+      <h5 class="text-success">Contact Details</h5>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Mobile No.</label>
+          <input type="text" class="form-control" name="mobile" required>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" class="form-control" name="email">
+        </div>
+      </div>
+    </div>
+
+    <!-- Project Section -->
+    <div class="form-section">
+      <h5 class="text-warning">Project Details</h5>
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label class="form-label">Project Name</label>
+          <input type="text" class="form-control" name="project_name" required>
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">Contractor Type</label>
-          <select name="contractor_type" class="form-select" required>
-            <option value="">-- Select --</option>
+          <select class="form-select" name="contractor_type" required>
+            <option value="">-- Select Contractor --</option>
             <option>Main Contractor</option>
             <option>Sub Contractor</option>
             <option>Other</option>
@@ -50,70 +89,36 @@
       </div>
     </div>
 
-    <!-- Contact Details -->
-    <div class="section-box">
-      <h5>Contact Details</h5>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Email</label>
-          <input type="email" name="email" class="form-control">
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Phone</label>
-          <input type="text" name="phone" class="form-control">
-        </div>
-      </div>
-    </div>
-
-    <!-- Enquiry Type -->
-    <div class="section-box">
-      <h5>Enquiry Details</h5>
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Enquiry Type</label>
-          <select name="enquiry_type" class="form-select" required>
-            <option value="">-- Select --</option>
-            <option>Tender</option>
-            <option>Enquiry</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label class="form-label">Reference Number</label>
-          <input type="text" name="reference_no" class="form-control">
-        </div>
-      </div>
-    </div>
-
-    <!-- Dates -->
-    <div class="section-box">
-      <h5>Dates</h5>
+    <!-- Date Section -->
+    <div class="form-section">
+      <h5 class="text-info">Date Details</h5>
       <div class="row">
         <div class="col-md-6 mb-3">
           <label class="form-label">Enquiry Date</label>
-          <input type="date" name="enquiry_date" class="form-control">
+          <input type="date" class="form-control" name="enquiry_date">
         </div>
         <div class="col-md-6 mb-3">
           <label class="form-label">Due Date</label>
-          <input type="date" name="due_date" class="form-control">
+          <input type="date" class="form-control" name="due_date">
         </div>
       </div>
     </div>
 
     <!-- Payment Terms -->
-    <div class="section-box">
-      <h5>Payment Terms</h5>
-      <textarea name="payment_terms" class="form-control" rows="3"></textarea>
+    <div class="form-section">
+      <h5 class="text-danger">Payment Terms</h5>
+      <textarea class="form-control" name="payment_terms" rows="3" placeholder="Enter payment terms if any..."></textarea>
     </div>
 
     <!-- File Upload -->
-    <div class="section-box">
-      <h5>Upload Files</h5>
-      <input type="file" class="form-control" name="file">
+    <div class="form-section">
+      <h5 class="text-secondary">File Upload</h5>
+      <input type="file" class="form-control" name="enquiry_file">
     </div>
 
-    <!-- Buttons -->
-    <div class="d-flex gap-2">
-      <button type="submit" class="btn btn-success">Submit</button>
+    <!-- Submit / Reset -->
+    <div class="text-end">
+      <button type="submit" class="btn btn-primary">Submit</button>
       <button type="reset" class="btn btn-secondary">Reset</button>
     </div>
   </form>
