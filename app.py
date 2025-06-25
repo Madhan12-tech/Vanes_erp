@@ -58,11 +58,11 @@ def login():
         else:
             flash('Invalid credentials.', 'danger')
     return render_template('login.html')
-
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
+    return render_template('dashboard.html')  # ← This line was missing
     
     modules = [
         {"name": "Management", "url": "/management"},
