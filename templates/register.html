@@ -2,109 +2,114 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Vendor Registration</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    .section-toggle {
+    .section-header {
       cursor: pointer;
-      font-weight: bold;
-      color: #0056b3;
+      padding: 10px;
+      background-color: #e3f2fd;
+      border: 1px solid #90caf9;
+      border-radius: 5px;
+      margin-top: 20px;
     }
-    .card-header {
-      background-color: #f0f0f0;
+    .section-body {
+      padding: 15px;
+      border: 1px solid #90caf9;
+      border-top: none;
+      border-radius: 0 0 5px 5px;
     }
-    .btn-outline-primary, .btn-outline-success {
-      width: 100%;
-      text-align: left;
+    .comm-row {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .comm-row input {
+      flex: 1;
     }
   </style>
 </head>
 <body class="bg-light">
 <div class="container py-5">
-  <h3 class="mb-4">New Vendor Registration</h3>
+  <h2 class="mb-4 text-center">Vendor Registration</h2>
   <form method="POST">
     
     <!-- Vendor Details Section -->
-    <p><a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#vendor-section" role="button">Vendor Details</a></p>
-    <div class="collapse show" id="vendor-section">
-      <div class="card card-body mb-3">
-        <div class="row mb-2">
-          <div class="col-md-6"><label class="form-label">Vendor ID</label><input type="text" name="vendor_id" class="form-control" required></div>
-          <div class="col-md-6"><label class="form-label">Company Name</label><input type="text" name="company_name" class="form-control" required></div>
-        </div>
-        <div class="mb-2"><label class="form-label">Company Address</label><input type="text" name="company_address" class="form-control" required></div>
-        <div class="row mb-2">
-          <div class="col-md-6"><label class="form-label">Office Mobile</label><input type="text" name="office_mobile" class="form-control"></div>
-          <div class="col-md-6"><label class="form-label">Office Telephone</label><input type="text" name="office_telephone" class="form-control"></div>
-        </div>
-        <div class="row mb-2">
-          <div class="col-md-6"><label class="form-label">Email</label><input type="email" name="email" class="form-control"></div>
-          <div class="col-md-6"><label class="form-label">GSTIN</label><input type="text" name="gstin" class="form-control"></div>
-        </div>
-        <div class="row">
-          <div class="col-md-6"><label class="form-label">PAN</label><input type="text" name="pan" class="form-control"></div>
-          <div class="col-md-6"><label class="form-label">TAN</label><input type="text" name="tan" class="form-control"></div>
-        </div>
+    <div class="section-header" data-bs-toggle="collapse" data-bs-target="#vendor-details">Vendor Details</div>
+    <div id="vendor-details" class="collapse show section-body">
+      <div class="row">
+        <div class="col-md-4 mb-3"><input type="text" name="vendor_id" class="form-control" placeholder="Vendor ID" required></div>
+        <div class="col-md-4 mb-3"><input type="text" name="company_name" class="form-control" placeholder="Company Name" required></div>
+        <div class="col-md-4 mb-3"><input type="text" name="company_address" class="form-control" placeholder="Company Address" required></div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3"><input type="text" name="office_mobile" class="form-control" placeholder="Office Mobile"></div>
+        <div class="col-md-6 mb-3"><input type="text" name="office_telephone" class="form-control" placeholder="Office Telephone"></div>
+      </div>
+      <div class="row">
+        <div class="col-md-6 mb-3"><input type="email" name="email" class="form-control" placeholder="Email"></div>
+        <div class="col-md-6 mb-3"><input type="text" name="gstin" class="form-control" placeholder="GSTIN"></div>
+        <div class="col-md-6 mb-3"><input type="text" name="pan" class="form-control" placeholder="PAN"></div>
+        <div class="col-md-6 mb-3"><input type="text" name="tan" class="form-control" placeholder="TAN"></div>
       </div>
     </div>
 
-    <!-- Communication Details Section -->
-    <p><a class="btn btn-outline-primary" data-bs-toggle="collapse" href="#comm-section" role="button">Communication Details</a></p>
-    <div class="collapse" id="comm-section">
-      <div class="card card-body mb-3">
-        <div id="comm-rows">
-          <div class="row mb-2 align-items-center comm-row">
-            <div class="col"><input type="text" name="contact_name[]" placeholder="Name" class="form-control"></div>
-            <div class="col"><input type="text" name="contact_dept[]" placeholder="Department" class="form-control"></div>
-            <div class="col"><input type="text" name="contact_desg[]" placeholder="Designation" class="form-control"></div>
-            <div class="col"><input type="text" name="contact_mob[]" placeholder="Mobile" class="form-control"></div>
-            <div class="col-auto"><button type="button" class="btn btn-danger btn-sm" onclick="removeCommRow(this)">−</button></div>
-          </div>
+    <!-- Communication Details -->
+    <div class="section-header" data-bs-toggle="collapse" data-bs-target="#communication-section">Communication Details</div>
+    <div id="communication-section" class="collapse section-body">
+      <div id="comm-rows">
+        <div class="comm-row">
+          <input type="text" name="contact_name[]" placeholder="Name" class="form-control">
+          <input type="text" name="contact_dept[]" placeholder="Department" class="form-control">
+          <input type="text" name="contact_desg[]" placeholder="Designation" class="form-control">
+          <input type="text" name="contact_mob[]" placeholder="Mobile" class="form-control">
+          <button type="button" class="btn btn-danger btn-sm" onclick="removeCommRow(this)">−</button>
         </div>
-        <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addCommRow()">+ Add Contact</button>
+      </div>
+      <button type="button" class="btn btn-sm btn-primary mt-2" onclick="addCommRow()">+ Add Contact</button>
+    </div>
+
+    <!-- Bank Details -->
+    <div class="section-header" data-bs-toggle="collapse" data-bs-target="#bank-section">Bank Details</div>
+    <div id="bank-section" class="collapse section-body">
+      <div class="row">
+        <div class="col-md-6 mb-3"><input type="text" name="ben_name" class="form-control" placeholder="Beneficiary Name"></div>
+        <div class="col-md-6 mb-3"><input type="text" name="ben_ac" class="form-control" placeholder="Account Number"></div>
+        <div class="col-md-4 mb-3"><input type="text" name="ac_type" class="form-control" placeholder="Account Type"></div>
+        <div class="col-md-4 mb-3"><input type="text" name="bank_name" class="form-control" placeholder="Bank Name"></div>
+        <div class="col-md-2 mb-3"><input type="text" name="ifsc" class="form-control" placeholder="IFSC"></div>
+        <div class="col-md-2 mb-3"><input type="text" name="micr" class="form-control" placeholder="MICR"></div>
       </div>
     </div>
 
-    <!-- Bank Details Section -->
-    <p><a class="btn btn-outline-success" data-bs-toggle="collapse" href="#bank-section" role="button">Bank Details</a></p>
-    <div class="collapse" id="bank-section">
-      <div class="card card-body">
-        <div class="row mb-2">
-          <div class="col-md-6"><label class="form-label">Beneficiary Name</label><input type="text" name="ben_name" class="form-control"></div>
-          <div class="col-md-6"><label class="form-label">Account Number</label><input type="text" name="ben_ac" class="form-control"></div>
-        </div>
-        <div class="row mb-2">
-          <div class="col-md-4"><label class="form-label">Account Type</label><input type="text" name="ac_type" class="form-control"></div>
-          <div class="col-md-4"><label class="form-label">Bank Name</label><input type="text" name="bank_name" class="form-control"></div>
-          <div class="col-md-2"><label class="form-label">IFSC</label><input type="text" name="ifsc" class="form-control"></div>
-          <div class="col-md-2"><label class="form-label">MICR</label><input type="text" name="micr" class="form-control"></div>
-        </div>
-      </div>
+    <div class="text-center">
+      <button type="submit" class="btn btn-success mt-4">Submit</button>
     </div>
 
-    <button type="submit" class="btn btn-success mt-4">Submit</button>
   </form>
 </div>
 
-<script>
-function addCommRow() {
-  const row = document.createElement('div');
-  row.className = 'row mb-2 align-items-center comm-row';
-  row.innerHTML = `
-    <div class="col"><input type="text" name="contact_name[]" placeholder="Name" class="form-control"></div>
-    <div class="col"><input type="text" name="contact_dept[]" placeholder="Department" class="form-control"></div>
-    <div class="col"><input type="text" name="contact_desg[]" placeholder="Designation" class="form-control"></div>
-    <div class="col"><input type="text" name="contact_mob[]" placeholder="Mobile" class="form-control"></div>
-    <div class="col-auto"><button type="button" class="btn btn-danger btn-sm" onclick="removeCommRow(this)">−</button></div>
-  `;
-  document.getElementById('comm-rows').appendChild(row);
-}
-
-function removeCommRow(button) {
-  button.closest('.comm-row').remove();
-}
-</script>
+<!-- Scripts -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  function addCommRow() {
+    const row = document.createElement('div');
+    row.className = 'comm-row';
+    row.innerHTML = `
+      <input type="text" name="contact_name[]" placeholder="Name" class="form-control">
+      <input type="text" name="contact_dept[]" placeholder="Department" class="form-control">
+      <input type="text" name="contact_desg[]" placeholder="Designation" class="form-control">
+      <input type="text" name="contact_mob[]" placeholder="Mobile" class="form-control">
+      <button type="button" class="btn btn-danger btn-sm" onclick="removeCommRow(this)">−</button>
+    `;
+    document.getElementById('comm-rows').appendChild(row);
+  }
+
+  function removeCommRow(button) {
+    button.parentElement.remove();
+  }
+</script>
 </body>
 </html>
