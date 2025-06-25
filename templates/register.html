@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vendor Registration</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<div class="container">
+    <h2>Vendor Registration</h2>
+    <form method="POST">
+        <h4>Company Details</h4>
+        <input type="text" name="vendor_id" placeholder="Vendor ID">
+        <input type="text" name="company_name" placeholder="Company Name">
+        <input type="text" name="company_address" placeholder="Company Address">
+        <input type="text" name="office_mobile" placeholder="Office Mobile">
+        <input type="text" name="office_telephone" placeholder="Office Telephone">
+        <input type="email" name="email" placeholder="Email Address">
+        <input type="text" name="gstin" placeholder="GSTIN Number">
+        <input type="text" name="pan" placeholder="PAN Number">
+        <input type="text" name="tan" placeholder="TAN Number">
+
+        <h4>Communication Details</h4>
+        <input type="text" name="name1" placeholder="Name 1">
+        <input type="text" name="dept1" placeholder="Department 1">
+        <input type="text" name="desg1" placeholder="Designation 1">
+        <input type="text" name="mob1" placeholder="Mobile 1">
+
+        <input type="text" name="name2" placeholder="Name 2">
+        <input type="text" name="dept2" placeholder="Department 2">
+        <input type="text" name="desg2" placeholder="Designation 2">
+        <input type="text" name="mob2" placeholder="Mobile 2">
+
+        <h4>Bank Details</h4>
+        <input type="text" name="ben_name" placeholder="Beneficiary Name">
+        <input type="text" name="ben_ac" placeholder="Account Number">
+        <input type="text" name="ac_type" placeholder="Account Type">
+        <input type="text" name="bank_name" placeholder="Bank Name">
+        <input type="text" name="ifsc" placeholder="IFSC Code">
+        <input type="text" name="micr" placeholder="MICR Code">
+
+        <button type="submit">Submit</button>
+    </form>
+</div>
+</body>
+</html>
