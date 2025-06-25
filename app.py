@@ -79,12 +79,6 @@ def management():
         return redirect(url_for('login'))
     return render_template("management.html")
 
-@app.route('/management')
-def management():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template("management.html")
-
 # ---------- Management Submodules ----------
 
 @app.route('/new-enquiry')
