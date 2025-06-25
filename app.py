@@ -74,7 +74,7 @@ def dashboard():
     ]
     return render_template("dashboard.html", modules=modules)
 
-# ✅ Paste these below dashboard route
+
 @app.route('/management')
 def management():
     if 'username' not in session:
@@ -148,13 +148,7 @@ def reset_password():
             flash("Session expired. Try again.", "danger")
             return redirect(url_for('forgot'))
     return render_template('reset_password.html')
-
-@app.route('/dashboard')
-def dashboard():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template('dashboard.html')
-
+    
 @app.route('/logout')
 def logout():
     session.pop('username', None)
