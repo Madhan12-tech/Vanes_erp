@@ -11,8 +11,7 @@ app.secret_key = 'vanes_secret_key'
 def init_db():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    
-    # Create vendors table with 16 columns
+
     c.execute('''CREATE TABLE IF NOT EXISTS vendors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         vendor_id TEXT, company_name TEXT, company_address TEXT,
@@ -36,7 +35,7 @@ def init_db():
     c.execute("SELECT * FROM users WHERE username='admin'")
     if not c.fetchone():
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", ('admin', 'admin123'))
-    
+
     conn.commit()
     conn.close()
 
@@ -58,12 +57,12 @@ def login():
         else:
             flash('Invalid credentials.', 'danger')
     return render_template('login.html')
+
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template('dashboard.html')  # ← This line was missing
-    
+
     modules = [
         {"name": "Management", "url": "/management"},
         {"name": "Accounts", "url": "/accounts"},
@@ -73,7 +72,6 @@ def dashboard():
         {"name": "Customer", "url": "/customer"}
     ]
     return render_template("dashboard.html", modules=modules)
-
 
 @app.route('/management')
 def management():
@@ -148,7 +146,7 @@ def reset_password():
             flash("Session expired. Try again.", "danger")
             return redirect(url_for('forgot'))
     return render_template('reset_password.html')
-    
+
 @app.route('/logout')
 def logout():
     session.pop('username', None)
@@ -169,7 +167,7 @@ def register():
             form['ben_name'], form['ben_ac'], form['ac_type'],
             form['bank_name'], form['ifsc'], form['micr']
         )
-        
+
         conn = sqlite3.connect('database.db')
         c = conn.cursor()
         c.execute('''INSERT INTO vendors (
@@ -177,7 +175,7 @@ def register():
             office_telephone, email, gstin, pan, tan,
             ben_name, ben_ac, ac_type, bank_name, ifsc, micr
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', vendor_data)
-        
+
         vendor_id = form['vendor_id']
         names = request.form.getlist('contact_name[]')
         depts = request.form.getlist('contact_dept[]')
@@ -187,7 +185,7 @@ def register():
         for name, dept, desg, mob in zip(names, depts, desigs, mobs):
             c.execute('''INSERT INTO vendor_contacts (vendor_id, name, dept, desg, mob)
                          VALUES (?, ?, ?, ?, ?)''', (vendor_id, name, dept, desg, mob))
-        
+
         conn.commit()
         conn.close()
         flash('Vendor registered successfully!', 'success')
