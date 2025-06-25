@@ -161,6 +161,34 @@ def customer():
         return redirect(url_for('login'))
     return render_template("customer.html")
 
+@app.route('/new_enquiry', methods=['GET', 'POST'])
+def new_enquiry():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        # Handle form data submission here later
+        flash("Enquiry submitted successfully!", "success")
+        return redirect(url_for('new_enquiry'))
+
+    # Auto-generate unique enquiry ID (example logic)
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='enquiries'")
+    if not c.fetchone()[0]:
+        c.execute('''CREATE TABLE enquiries (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            enquiry_id TEXT
+        )''')
+    c.execute("SELECT COUNT(*) FROM enquiries")
+    count = c.fetchone()[0] + 1
+    enquiry_id = f"TEI/Enquiry/{count:03}"
+    c.execute("INSERT INTO enquiries (enquiry_id) VALUES (?)", (enquiry_id,))
+    conn.commit()
+    conn.close()
+
+    return render_template('new_enquiry.html', enquiry_id=enquiry_id)
+
 @app.route('/forgot', methods=['GET', 'POST'])
 def forgot():
     if request.method == 'POST':
