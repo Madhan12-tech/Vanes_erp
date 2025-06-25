@@ -20,13 +20,17 @@ def init_db():
         ben_name TEXT, ben_ac TEXT, ac_type TEXT,
         bank_name TEXT, ifsc TEXT, micr TEXT
     )''')
+
     c.execute('''CREATE TABLE IF NOT EXISTS users (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         username TEXT, password TEXT
     )''')
+
+    # Add admin if not exists
     c.execute("SELECT * FROM users WHERE username='admin'")
     if not c.fetchone():
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", ('admin', 'admin123'))
+
     conn.commit()
     conn.close()
 
@@ -96,14 +100,26 @@ def logout():
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if request.method == 'POST':
-        form = request.form
         data = (
-            form['vendor_id'], form['company_name'], form['company_address'],
-            form['office_mobile'], form['office_telephone'], form['email'],
-            form['gstin'], form['pan'], form['tan'],
-            form['name1'], form['dept1'], form['desg1'], form['mob1'],
-            form['ben_name'], form['ben_ac'], form['ac_type'],
-            form['bank_name'], form['ifsc'], form['micr']
+            request.form['vendor_id'],
+            request.form['company_name'],
+            request.form['company_address'],
+            request.form['office_mobile'],
+            request.form['office_telephone'],
+            request.form['email'],
+            request.form['gstin'],
+            request.form['pan'],
+            request.form['tan'],
+            request.form['name1'],
+            request.form['dept1'],
+            request.form['desg1'],
+            request.form['mob1'],
+            request.form['ben_name'],
+            request.form['ben_ac'],
+            request.form['ac_type'],
+            request.form['bank_name'],
+            request.form['ifsc'],
+            request.form['micr']
         )
         conn = sqlite3.connect('database.db')
         c = conn.cursor()
@@ -123,6 +139,7 @@ def vendors():
     if 'username' not in session:
         flash("Login required", "warning")
         return redirect(url_for('login'))
+
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute("SELECT * FROM vendors")
@@ -148,6 +165,7 @@ def edit(vendor_id):
         conn.close()
         flash("Vendor updated!", "success")
         return redirect(url_for('vendors'))
+
     c.execute("SELECT * FROM vendors WHERE id=?", (vendor_id,))
     vendor = c.fetchone()
     conn.close()
@@ -168,23 +186,27 @@ def export():
     if 'username' not in session:
         flash("Login required", "warning")
         return redirect(url_for('login'))
+
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute("SELECT * FROM vendors")
     data = c.fetchall()
     conn.close()
+
     wb = openpyxl.Workbook()
     ws = wb.active
     ws.title = "Vendors"
     headers = [
         "ID", "Vendor ID", "Company Name", "Company Address", "Office Mobile",
         "Office Telephone", "Email", "GSTIN", "PAN", "TAN",
-        "Contact Name", "Department", "Designation", "Mobile",
-        "Beneficiary Name", "Account No", "Account Type", "Bank Name", "IFSC", "MICR"
+        "Contact 1 Name", "Dept", "Designation", "Mobile",
+        "Beneficiary Name", "Account Number", "Account Type",
+        "Bank Name", "IFSC", "MICR"
     ]
     ws.append(headers)
     for row in data:
         ws.append(row)
+
     output = BytesIO()
     wb.save(output)
     output.seek(0)
