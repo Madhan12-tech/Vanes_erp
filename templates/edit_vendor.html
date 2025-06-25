@@ -1,22 +1,54 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Edit Vendor</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Edit Vendor</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #f8f9fa;
+      padding: 40px;
+    }
+    .box {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+  </style>
 </head>
 <body>
-<h2>Edit Vendor</h2>
-<form method="POST">
-    <label>Company Name:</label>
-    <input type="text" name="company_name" value="{{ vendor[2] }}"><br>
+  <div class="box">
+    <h4 class="mb-4 text-center">Edit Vendor</h4>
 
-    <label>Email:</label>
-    <input type="email" name="email" value="{{ vendor[6] }}"><br>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
 
-    <label>Mobile:</label>
-    <input type="text" name="office_mobile" value="{{ vendor[4] }}"><br>
-
-    <button type="submit">Save</button>
-    <a href="/vendors">Cancel</a>
-</form>
+    <form method="POST">
+      <div class="mb-3">
+        <label class="form-label">Company Name</label>
+        <input type="text" name="company_name" value="{{ vendor[2] }}" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input type="email" name="email" value="{{ vendor[6] }}" class="form-control" required>
+      </div>
+      <div class="mb-3">
+        <label class="form-label">Office Mobile</label>
+        <input type="text" name="office_mobile" value="{{ vendor[4] }}" class="form-control" required>
+      </div>
+      <div class="d-grid">
+        <button type="submit" class="btn btn-primary">Update Vendor</button>
+      </div>
+    </form>
+  </div>
 </body>
 </html>
