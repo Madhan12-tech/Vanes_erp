@@ -12,6 +12,7 @@ def init_db():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     
+    # Create vendors table with 16 columns
     c.execute('''CREATE TABLE IF NOT EXISTS vendors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         vendor_id TEXT, company_name TEXT, company_address TEXT,
@@ -40,7 +41,6 @@ def init_db():
     conn.close()
 
 # ---------- Routes ----------
-
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
