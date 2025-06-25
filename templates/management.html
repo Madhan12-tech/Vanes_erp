@@ -2,94 +2,94 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Management</title>
+  <title>Management Module</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
     body {
-      background-color: #f8f9fa;
+      display: flex;
+      height: 100vh;
     }
     .sidebar {
-      height: 100vh;
+      width: 260px;
       background-color: #343a40;
       color: white;
-      padding-top: 20px;
+      padding: 20px;
+    }
+    .sidebar h4 {
+      color: #ffc107;
     }
     .sidebar a {
+      display: block;
+      padding: 8px;
       color: white;
       text-decoration: none;
-      display: block;
-      padding: 10px 20px;
+      border-radius: 5px;
     }
     .sidebar a:hover {
       background-color: #495057;
     }
     .content {
-      padding: 20px;
+      flex-grow: 1;
+      padding: 30px;
+      background-color: #f8f9fa;
     }
-    .graph-card {
-      height: 200px;
-      background-color: white;
-      border: 1px solid #dee2e6;
-      border-radius: 8px;
-      padding: 10px;
-      margin-bottom: 20px;
+    .section-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
     }
   </style>
 </head>
 <body>
 
-<div class="container-fluid">
-  <div class="row">
-    <!-- Sidebar -->
-    <div class="col-md-3 sidebar">
-      <h4 class="text-center">Management</h4>
-      <hr>
-      <h6 class="px-3">Sales</h6>
-      <a href="/new-enquiry">➤ New Enquiry</a>
-      <a href="/progress-award">➤ Progress / Award</a>
+<div class="sidebar">
+  <h4>Management</h4>
+  <a href="#" onclick="openEnquiryForm()">➕ Sales - New Enquiry</a>
+  <a href="#">📊 Sales - Progress / Award</a>
+  <a href="#">🏗️ Production - New Project</a>
+  <a href="#">📂 Accounts - DC / Invoice</a>
+  <a href="#">📋 Accounts - MRS Sheet</a>
+  <a href="#">📈 Accounts - Consolidated Reports</a>
+  <a href="#">👷 Employee - Production</a>
+  <a href="#">📦 Employee - Raw Material</a>
+  <a href="#">🌀 Coils</a>
+  <a href="#">🔩 Bolts</a>
+  <a href="#">🧩 Gaskets</a>
+  <a href="#">🧾 Raw Material Reports</a>
+</div>
 
-      <h6 class="px-3 mt-3">Production</h6>
-      <a href="/new-project">➤ New Project</a>
+<div class="content">
+  <h2>Welcome to Management Dashboard</h2>
+  <p>Select a section on the left to proceed.</p>
 
-      <h6 class="px-3 mt-3">Accounts</h6>
-      <a href="/dc-invoice">➤ DC / Invoice</a>
-      <a href="/mrs-sheet">➤ MRS Sheet</a>
-      <a href="/consolidated-report">➤ Consolidated Reports</a>
-
-      <h6 class="px-3 mt-3">Employee</h6>
-      <a href="/employee-production">➤ Production</a>
-      <a href="/raw-coils">➤ Raw Material - Coils</a>
-      <a href="/raw-bolts">➤ Raw Material - Bolts</a>
-      <a href="/raw-gaskets">➤ Raw Material - Gaskets</a>
-      <a href="/raw-reports">➤ Raw Material - Reports</a>
-    </div>
-
-    <!-- Right Content -->
-    <div class="col-md-9 content">
-      <h3>Company Insights</h3>
-      <div class="row">
-        <div class="col-md-6">
-          <div class="graph-card">📊 Sales Graph</div>
+  <!-- Modal -->
+  <div class="modal fade" id="enquiryModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">New Enquiry</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
-        <div class="col-md-6">
-          <div class="graph-card">📊 Production Graph</div>
-        </div>
-        <div class="col-md-6">
-          <div class="graph-card">📊 Attendance Graph</div>
-        </div>
-        <div class="col-md-6">
-          <div class="graph-card">📊 Project Progress</div>
-        </div>
-        <div class="col-md-6">
-          <div class="graph-card">📊 Ongoing Projects</div>
-        </div>
-        <div class="col-md-6">
-          <div class="graph-card">📊 Raw Material Stock</div>
+        <div class="modal-body" id="enquiryModalBody">
+          <!-- Enquiry form loaded via AJAX -->
         </div>
       </div>
     </div>
   </div>
+
 </div>
 
+<script>
+function openEnquiryForm() {
+  fetch('/new_enquiry_form')
+    .then(res => res.text())
+    .then(html => {
+      document.getElementById('enquiryModalBody').innerHTML = html;
+      new bootstrap.Modal(document.getElementById('enquiryModal')).show();
+    });
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
