@@ -79,6 +79,58 @@ def management():
         return redirect(url_for('login'))
     return render_template("management.html")
 
+@app.route('/management')
+def management():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template("management.html")
+
+# ---------- Management Submodules ----------
+
+@app.route('/new-enquiry')
+def new_enquiry():
+    return render_template('new_enquiry.html')
+
+@app.route('/progress-award')
+def progress_award():
+    return render_template('progress_award.html')
+
+@app.route('/new-project')
+def new_project():
+    return render_template('new_project.html')
+
+@app.route('/dc-invoice')
+def dc_invoice():
+    return render_template('dc_invoice.html')
+
+@app.route('/mrs-sheet')
+def mrs_sheet():
+    return render_template('mrs_sheet.html')
+
+@app.route('/consolidated-report')
+def consolidated_report():
+    return render_template('consolidated_report.html')
+
+@app.route('/employee-production')
+def employee_production():
+    return render_template('employee_production.html')
+
+@app.route('/raw-coils')
+def raw_coils():
+    return render_template('coils.html')
+
+@app.route('/raw-bolts')
+def raw_bolts():
+    return render_template('bolts.html')
+
+@app.route('/raw-gaskets')
+def raw_gaskets():
+    return render_template('gaskets.html')
+
+@app.route('/raw-reports')
+def raw_reports():
+    return render_template('raw_reports.html')
+
 @app.route('/accounts')
 def accounts():
     if 'username' not in session:
