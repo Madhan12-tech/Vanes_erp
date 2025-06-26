@@ -177,6 +177,10 @@ def progress_award():
     conn.close()
     return render_template('progress_award.html', enquiries=enquiries)
 
+@app.route('/new_enquiry_form')
+def new_enquiry_page():
+    return render_template('new_enquiry.html')
+
 # ---------- Projects ----------
 @app.route('/project_status')
 def project_status():
