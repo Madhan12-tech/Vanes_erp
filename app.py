@@ -1,9 +1,8 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, jsonify
 import sqlite3
 import openpyxl
 from io import BytesIO
 import random
-from flask import jsonify
 
 app = Flask(__name__)
 app.secret_key = 'vanes_secret_key'
@@ -12,6 +11,15 @@ app.secret_key = 'vanes_secret_key'
 def init_db():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
+
+    # User and Vendor tables
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT, password TEXT
+    )''')
+    c.execute("SELECT * FROM users WHERE username='admin'")
+    if not c.fetchone():
+        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", ('admin', 'admin123'))
 
     c.execute('''CREATE TABLE IF NOT EXISTS vendors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,23 +32,25 @@ def init_db():
 
     c.execute('''CREATE TABLE IF NOT EXISTS vendor_contacts (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        vendor_id TEXT,
-        name TEXT, dept TEXT, desg TEXT, mob TEXT
+        vendor_id TEXT, name TEXT, dept TEXT, desg TEXT, mob TEXT
     )''')
 
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
+    # Enquiry tables
+    c.execute('''CREATE TABLE IF NOT EXISTS enquiries (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT, password TEXT
+        enquiry_id TEXT
     )''')
 
-    c.execute("SELECT * FROM users WHERE username='admin'")
-    if not c.fetchone():
-        c.execute("INSERT INTO users (username, password) VALUES (?, ?)", ('admin', 'admin123'))
+    c.execute('''CREATE TABLE IF NOT EXISTS enquiry_details (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        enquiry_id TEXT, enquiry_type TEXT, contractor_type TEXT,
+        client_name TEXT, project_title TEXT
+    )''')
 
     conn.commit()
     conn.close()
 
-# ---------- Routes ----------
+# ---------- Authentication ----------
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -59,11 +69,17 @@ def login():
             flash('Invalid credentials.', 'danger')
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash("Logged out successfully.", "info")
+    return redirect(url_for('login'))
+
+# ---------- Dashboard ----------
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
         return redirect(url_for('login'))
-
     modules = [
         {"name": "Management", "url": "/management"},
         {"name": "Accounts", "url": "/accounts"},
@@ -74,215 +90,17 @@ def dashboard():
     ]
     return render_template("dashboard.html", modules=modules)
 
+# ---------- Management ----------
 @app.route('/management')
 def management():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template("management.html")
 
-# ---------- Management Submodules ----------
-@app.route('/new-enquiry')
-def new_enquiry_page():  # renamed to avoid conflict
-    return render_template('new_enquiry.html')
-
-@app.route('/new_enquiry', methods=['GET', 'POST'])
-def new_enquiry():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        # Process form here
-        flash("Enquiry submitted successfully!", "success")
-        return redirect(url_for('new_enquiry_page'))
-
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM sqlite_master WHERE type='table' AND name='enquiries'")
-    if not c.fetchone()[0]:
-        c.execute('''CREATE TABLE enquiries (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            enquiry_id TEXT
-        )''')
-    c.execute("SELECT COUNT(*) FROM enquiries")
-    count = c.fetchone()[0] + 1
-    enquiry_id = f"TEI/Enquiry/{count:03}"
-    c.execute("INSERT INTO enquiries (enquiry_id) VALUES (?)", (enquiry_id,))
-    conn.commit()
-    conn.close()
-
-    return render_template('new_enquiry.html', enquiry_id=enquiry_id)
-
-@app.route('/progress-award')
-def progress_award():
-    return render_template('progress_award.html')
-
-@app.route('/new-project')
-def new_project():
-    return render_template('new_project.html')
-
-@app.route('/dc-invoice')
-def dc_invoice():
-    return render_template('dc_invoice.html')
-
-@app.route('/mrs-sheet')
-def mrs_sheet():
-    return render_template('mrs_sheet.html')
-
-@app.route('/consolidated-report')
-def consolidated_report():
-    return render_template('consolidated_report.html')
-
-@app.route('/employee-production')
-def employee_production():
-    return render_template('employee_production.html')
-
-@app.route('/raw-coils')
-def raw_coils():
-    return render_template('coils.html')
-
-@app.route('/raw-bolts')
-def raw_bolts():
-    return render_template('bolts.html')
-
-@app.route('/raw-gaskets')
-def raw_gaskets():
-    return render_template('gaskets.html')
-
-@app.route('/raw-reports')
-def raw_reports():
-    return render_template('raw_reports.html')
-
-@app.route('/accounts')
-def accounts():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template("accounts.html")
-
-@app.route('/project')
-def project():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template("project.html")
-
-@app.route('/production')
-def production():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template("production.html")
-
-@app.route('/sales')
-def sales():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template("sales.html")
-
-@app.route('/customer')
-def customer():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template("customer.html")
-
-@app.route('/forgot', methods=['GET', 'POST'])
-def forgot():
-    if request.method == 'POST':
-        session['otp'] = str(random.randint(100000, 999999))
-        session['username_reset'] = request.form['username']
-        flash(f"OTP sent to your email: {session['otp']} (simulated)", "info")
-        return redirect(url_for('verify_otp'))
-    return render_template('forgot.html')
-
-@app.route('/verify_otp', methods=['GET', 'POST'])
-def verify_otp():
-    if request.method == 'POST':
-        entered = request.form['otp']
-        if 'otp' in session and entered == session['otp']:
-            flash("OTP verified! You can now reset your password.", "success")
-            return redirect(url_for('reset_password'))
-        else:
-            flash("Invalid OTP.", "danger")
-    return render_template('verify_otp.html')
-
-@app.route('/reset_password', methods=['GET', 'POST'])
-def reset_password():
-    if request.method == 'POST':
-        new_pass = request.form['password']
-        username = session.get('username_reset')
-        if username:
-            conn = sqlite3.connect('database.db')
-            c = conn.cursor()
-            c.execute("UPDATE users SET password=? WHERE username=?", (new_pass, username))
-            conn.commit()
-            conn.close()
-            flash("Password updated. Please login.", "success")
-            return redirect(url_for('login'))
-        else:
-            flash("Session expired. Try again.", "danger")
-            return redirect(url_for('forgot'))
-    return render_template('reset_password.html')
-
-@app.route('/logout')
-def logout():
-    session.pop('username', None)
-    flash("Logged out successfully.", "info")
-    return redirect(url_for('login'))
-
-@app.route('/register', methods=['GET', 'POST'])
-def register():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    if request.method == 'POST':
-        form = request.form
-        vendor_data = (
-            form['vendor_id'], form['company_name'], form['company_address'],
-            form['office_mobile'], form['office_telephone'], form['email'],
-            form['gstin'], form['pan'], form['tan'],
-            form['ben_name'], form['ben_ac'], form['ac_type'],
-            form['bank_name'], form['ifsc'], form['micr']
-        )
-
-        conn = sqlite3.connect('database.db')
-        c = conn.cursor()
-        c.execute('''INSERT INTO vendors (
-            vendor_id, company_name, company_address, office_mobile,
-            office_telephone, email, gstin, pan, tan,
-            ben_name, ben_ac, ac_type, bank_name, ifsc, micr
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', vendor_data)
-
-        vendor_id = form['vendor_id']
-        names = request.form.getlist('contact_name[]')
-        depts = request.form.getlist('contact_dept[]')
-        desigs = request.form.getlist('contact_desg[]')
-        mobs = request.form.getlist('contact_mob[]')
-
-        for name, dept, desg, mob in zip(names, depts, desigs, mobs):
-            c.execute('''INSERT INTO vendor_contacts (vendor_id, name, dept, desg, mob)
-                         VALUES (?, ?, ?, ?, ?)''', (vendor_id, name, dept, desg, mob))
-
-        conn.commit()
-        conn.close()
-        flash('Vendor registered successfully!', 'success')
-        return redirect(url_for('register'))
-
-    return render_template('register.html')
-
-@app.route('/vendors')
-def vendors():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("SELECT * FROM vendors")
-    vendors = c.fetchall()
-    conn.close()
-    return render_template("vendors.html", vendors=vendors)
-
 @app.route('/get_enquiry_id')
 def get_enquiry_id():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS enquiries (id INTEGER PRIMARY KEY AUTOINCREMENT, enquiry_id TEXT)")
     c.execute("SELECT COUNT(*) FROM enquiries")
     count = c.fetchone()[0] + 1
     enquiry_id = f"TEI/Enquiry/{count:03}"
@@ -293,30 +111,108 @@ def get_enquiry_id():
 
 @app.route('/submit_enquiry', methods=['POST'])
 def submit_enquiry():
-    enquiry_id = request.form.get("enquiry_id")
-    enquiry_type = request.form.get("enquiry_type")
-    contractor_type = request.form.get("contractor_type")
+    data = request.form
+    enquiry_id = data.get("enquiry_id")
+    enquiry_type = data.get("enquiry_type")
+    contractor_type = data.get("contractor_type")
+    client_name = data.get("client_name")
+    project_title = data.get("project_title")
 
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute("CREATE TABLE IF NOT EXISTS enquiry_details (id INTEGER PRIMARY KEY AUTOINCREMENT, enquiry_id TEXT, enquiry_type TEXT, contractor_type TEXT)")
-    c.execute("INSERT INTO enquiry_details (enquiry_id, enquiry_type, contractor_type) VALUES (?, ?, ?)",
-              (enquiry_id, enquiry_type, contractor_type))
+    c.execute('''INSERT INTO enquiry_details (
+        enquiry_id, enquiry_type, contractor_type, client_name, project_title
+    ) VALUES (?, ?, ?, ?, ?)''', (enquiry_id, enquiry_type, contractor_type, client_name, project_title))
     conn.commit()
     conn.close()
 
     return jsonify({"message": "Enquiry submitted successfully!"})
 
-@app.route('/export')
-def export():
+@app.route('/progress-award')
+def progress_award():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT enquiry_id, client_name, project_title FROM enquiry_details")
+    rows = c.fetchall()
+    conn.close()
+    return render_template("progress_award.html", enquiries=rows)
+
+# ---------- Other Routes ----------
+@app.route('/accounts')
+def accounts():
+    return render_template("accounts.html")
+
+@app.route('/project')
+def project():
+    return render_template("project.html")
+
+@app.route('/production')
+def production():
+    return render_template("production.html")
+
+@app.route('/sales')
+def sales():
+    return render_template("sales.html")
+
+@app.route('/customer')
+def customer():
+    return render_template("customer.html")
+
+# ---------- Vendor Register ----------
+@app.route('/register', methods=['GET', 'POST'])
+def register():
     if 'username' not in session:
         return redirect(url_for('login'))
+    if request.method == 'POST':
+        form = request.form
+        vendor_data = (
+            form['vendor_id'], form['company_name'], form['company_address'],
+            form['office_mobile'], form['office_telephone'], form['email'],
+            form['gstin'], form['pan'], form['tan'],
+            form['ben_name'], form['ben_ac'], form['ac_type'],
+            form['bank_name'], form['ifsc'], form['micr']
+        )
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('''INSERT INTO vendors (
+            vendor_id, company_name, company_address, office_mobile,
+            office_telephone, email, gstin, pan, tan,
+            ben_name, ben_ac, ac_type, bank_name, ifsc, micr
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', vendor_data)
 
+        names = request.form.getlist('contact_name[]')
+        depts = request.form.getlist('contact_dept[]')
+        desigs = request.form.getlist('contact_desg[]')
+        mobs = request.form.getlist('contact_mob[]')
+        for name, dept, desg, mob in zip(names, depts, desigs, mobs):
+            c.execute('''INSERT INTO vendor_contacts (vendor_id, name, dept, desg, mob)
+                         VALUES (?, ?, ?, ?, ?)''', (form['vendor_id'], name, dept, desg, mob))
+
+        conn.commit()
+        conn.close()
+        flash('Vendor registered successfully!', 'success')
+        return redirect(url_for('register'))
+    return render_template('register.html')
+
+@app.route('/vendors')
+def vendors():
+    if 'username' not in session:
+        return redirect(url_for('login'))
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute("SELECT * FROM vendors")
     vendors = c.fetchall()
+    conn.close()
+    return render_template("vendors.html", vendors=vendors)
 
+@app.route('/export')
+def export():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM vendors")
+    vendors = c.fetchall()
     c.execute("SELECT * FROM vendor_contacts")
     contacts = c.fetchall()
     conn.close()
@@ -342,7 +238,7 @@ def export():
     output.seek(0)
     return send_file(output, as_attachment=True, download_name="vendors.xlsx", mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-# ---------- Run ----------
+# ---------- Init ----------
 if __name__ == '__main__':
     init_db()
     app.run(host='0.0.0.0', port=10000)
