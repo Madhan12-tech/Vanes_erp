@@ -159,7 +159,6 @@ def submit_enquiry():
         data['enquiry_id'], data['enquiry_type'], data['contractor_type'],
         data['client_name'], data['project_title'], 'In Progress'))
 
-    # Also insert into project_details
     c.execute("INSERT INTO project_details (project_id, client_name, project_title, status) VALUES (?, ?, ?, ?)",
               (data['enquiry_id'], data['client_name'], data['project_title'], 'Pending'))
 
@@ -178,7 +177,25 @@ def progress_award():
     conn.close()
     return render_template('progress_award.html', enquiries=enquiries)
 
-# ---------- Projects ----------
+# ---------- New Project (Fixed Route) ----------
+@app.route('/new_project', methods=['GET', 'POST'])
+def new_project():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    if request.method == 'POST':
+        form = request.form
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute("INSERT INTO project_details (project_id, client_name, project_title, status) VALUES (?, ?, ?, ?)",
+                  (form['project_id'], form['client_name'], form['project_title'], form['status']))
+        conn.commit()
+        conn.close()
+        flash('Project added successfully!', 'success')
+        return redirect(url_for('new_project'))
+
+    return render_template('new_project.html')
+
 @app.route('/project_status')
 def project_status():
     if 'username' not in session:
@@ -299,6 +316,7 @@ def sales():
 def customer():
     return render_template("customer.html")
 
+# ---------- Run ----------
 if __name__ == '__main__':
     init_db()
     port = int(os.environ.get('PORT', 10000))
