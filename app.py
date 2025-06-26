@@ -7,7 +7,7 @@ import os
 app = Flask(name) 
 app.secret_key = 'vanes_secret_key'
 
----------- DB Initialization ----------
+#---------- DB Initialization ----------
 
 def init_db(): conn = sqlite3.connect('database.db') c = conn.cursor()
 
