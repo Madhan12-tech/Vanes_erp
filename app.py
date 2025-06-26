@@ -295,6 +295,16 @@ def export():
     output.seek(0)
     return send_file(output, as_attachment=True, download_name="vendors.xlsx", mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
+@app.route('/get_enquiry_id')
+def get_enquiry_id():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM enquiry_details")
+    count = c.fetchone()[0] + 1
+    conn.close()
+    enquiry_id = f"TEI/Enquiry/{count:03}"
+    return jsonify({'enquiry_id': enquiry_id})
+
 # ---------- Placeholder Modules ----------
 @app.route('/accounts')
 def accounts():
