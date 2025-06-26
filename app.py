@@ -112,7 +112,7 @@ def reset_password():
         return redirect(url_for('login'))
     return render_template('reset_password.html')
 
-# ----------------- Dashboard ------------------
+
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
@@ -126,10 +126,6 @@ def dashboard():
         {"name": "Customer", "url": "/customer"}
     ]
     return render_template('dashboard.html', modules=modules)
-
-@app.route('/management')
-def management():
-    return render_template('management.html')
 
 # ----------------- Enquiry ------------------
 @app.route('/get_enquiry_id')
