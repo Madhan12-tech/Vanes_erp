@@ -1,10 +1,11 @@
+<!-- new_enquiry.html -->
 <div class="modal-header">
   <h5 class="modal-title" id="newEnquiryModalLabel">New Enquiry</h5>
   <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 </div>
 
 <div class="modal-body">
-  <form id="enquiryForm">
+  <form id="enquiryForm" enctype="multipart/form-data">
     <div class="mb-3">
       <label for="enquiry_id" class="form-label">Enquiry ID</label>
       <input type="text" class="form-control" id="enquiry_id" name="enquiry_id" readonly required>
@@ -39,13 +40,17 @@
       <input type="text" class="form-control" id="project_title" name="project_title" required>
     </div>
 
+    <div class="mb-3">
+      <label for="file" class="form-label">Upload File (optional)</label>
+      <input type="file" class="form-control" id="file" name="file">
+    </div>
+
     <div class="modal-footer">
       <button type="submit" class="btn btn-primary">Submit Enquiry</button>
     </div>
   </form>
 </div>
 
-<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 <script>
   $(document).ready(function () {
     $.get('/get_enquiry_id', function (data) {
@@ -54,17 +59,20 @@
 
     $('#enquiryForm').submit(function (e) {
       e.preventDefault();
+      const formData = new FormData(this);
       $.ajax({
-        type: 'POST',
         url: '/submit_enquiry',
-        data: $(this).serialize(),
-        success: function (response) {
-          alert(response.message);
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (res) {
+          alert(res.message);
           $('#newEnquiryModal').modal('hide');
           location.reload();
         },
         error: function () {
-          alert('Error submitting enquiry.');
+          alert('Error submitting enquiry');
         }
       });
     });
