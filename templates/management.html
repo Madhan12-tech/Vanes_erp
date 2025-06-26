@@ -1,51 +1,50 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <title>Management</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <meta charset="UTF-8">
+  <title>Management Dashboard</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
 <body class="bg-light">
   <div class="container mt-5">
-    <h2 class="text-center mb-4">Management Module</h2>
-
-    <!-- Sales Section -->
-    <div class="card mb-4 shadow">
-      <div class="card-header bg-primary text-white">
-        Sales
+    <h2 class="text-center mb-4">Management Modules</h2>
+    <div class="row">
+      <!-- Sales Section -->
+      <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+          <div class="card-header bg-info text-white">Sales</div>
+          <div class="card-body">
+            <a href="{{ url_for('new_enquiry') }}" class="btn btn-outline-primary w-100 mb-2">New Enquiry</a>
+            <a href="{{ url_for('progress_award') }}" class="btn btn-outline-success w-100">Progress / Award Status</a>
+          </div>
+        </div>
       </div>
-      <div class="card-body">
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">
-            <a href="#" data-bs-toggle="modal" data-bs-target="#newEnquiryModal">New Enquiry</a>
-          </li>
-          <li class="list-group-item">
-            <a href="{{ url_for('progress_award') }}" class="text-decoration-none">Progress / Award Status</a>
-          </li>
-        </ul>
+
+      <!-- Production Section -->
+      <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+          <div class="card-header bg-secondary text-white">Production</div>
+          <div class="card-body">
+            <a href="{{ url_for('new_project') }}" class="btn btn-outline-primary w-100 mb-2">New Project</a>
+            <a href="{{ url_for('project_status') }}" class="btn btn-outline-success w-100">Project Status</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- Accounts Placeholder -->
+      <div class="col-md-4">
+        <div class="card mb-3 shadow-sm">
+          <div class="card-header bg-dark text-white">Accounts</div>
+          <div class="card-body">
+            <a href="{{ url_for('accounts') }}" class="btn btn-outline-warning w-100">Accounts Module</a>
+          </div>
+        </div>
       </div>
     </div>
 
-    <!-- Production Section -->
-    <div class="card mb-4 shadow">
-      <div class="card-header bg-success text-white">
-        Production
-      </div>
-      <div class="card-body">
-        <ul class="list-group list-group-flush">
-          <li class="list-group-item">
-            <a href="{{ url_for('new_project') }}" class="text-decoration-none">New Project</a>
-          </li>
-          <li class="list-group-item">
-            <a href="{{ url_for('project_status') }}" class="text-decoration-none">Project Status</a>
-          </li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Navigation -->
+    <!-- Go Back -->
     <div class="text-center mt-4">
-      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+      <a href="{{ url_for('dashboard') }}" class="btn btn-outline-dark">Back to Dashboard</a>
     </div>
   </div>
 </body>
