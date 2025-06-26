@@ -1,5 +1,5 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify, send_from_directory
-import sqlite3, os, random
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
+import sqlite3, os
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
@@ -25,6 +25,15 @@ def init_db():
         )
     ''')
     c.execute('''
+        CREATE TABLE IF NOT EXISTS project_details (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            project_id TEXT,
+            client_name TEXT,
+            project_title TEXT,
+            status TEXT DEFAULT 'Pending'
+        )
+    ''')
+    c.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT,
@@ -36,7 +45,8 @@ def init_db():
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", ('admin', 'admin123'))
     conn.commit()
     conn.close()
-    # ---------- Authentication ----------
+
+# ---------- Authentication ----------
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -97,27 +107,39 @@ def get_enquiry_id():
     conn.close()
     return jsonify({"enquiry_id": f"TEI/Enquiry/{count:03}"})
 
-
 # ---------- Submit New Enquiry ----------
 @app.route('/submit_enquiry', methods=['POST'])
 def submit_enquiry():
-    data = request.form
+    enquiry_id = request.form.get('enquiry_id')
+    enquiry_type = request.form.get('enquiry_type')
+    contractor_type = request.form.get('contractor_type')
+    client_name = request.form.get('client_name')
+    project_title = request.form.get('project_title')
+
+    file = request.files.get('file')
+    file_name = None
+    if file and file.filename:
+        filename = secure_filename(f"{enquiry_id}_{file.filename}")
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(file_path)
+        file_name = filename
+
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('''INSERT INTO enquiry_details (
-        enquiry_id, enquiry_type, contractor_type, client_name, project_title, status
-    ) VALUES (?, ?, ?, ?, ?, ?)''', (
-        data['enquiry_id'], data['enquiry_type'], data['contractor_type'],
-        data['client_name'], data['project_title'], 'In Progress'))
+        enquiry_id, enquiry_type, contractor_type, client_name, project_title, status, file_name
+    ) VALUES (?, ?, ?, ?, ?, ?, ?)''', (
+        enquiry_id, enquiry_type, contractor_type, client_name, project_title, 'In Progress', file_name))
 
-    # Automatically insert into project table for status tracking
-    c.execute("INSERT INTO project_details (project_id, client_name, project_title, status) VALUES (?, ?, ?, ?)",
-              (data['enquiry_id'], data['client_name'], data['project_title'], 'Pending'))
+    c.execute('''INSERT INTO project_details (
+        project_id, client_name, project_title, status
+    ) VALUES (?, ?, ?, ?)''', (
+        enquiry_id, client_name, project_title, 'Pending'))
 
     conn.commit()
     conn.close()
-    return jsonify({"message": "Enquiry submitted successfully!"})
 
+    return jsonify({"message": "Enquiry submitted successfully!"})
 
 # ---------- View Progress / Award Status ----------
 @app.route('/progress-award')
@@ -131,16 +153,13 @@ def progress_award():
     conn.close()
     return render_template('progress_award.html', enquiries=enquiries)
 
-
 # ---------- Edit Enquiry ----------
 @app.route('/edit_enquiry/<int:id>', methods=['GET', 'POST'])
 def edit_enquiry(id):
     if 'username' not in session:
         return redirect(url_for('login'))
-
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-
     if request.method == 'POST':
         form = request.form
         c.execute('''UPDATE enquiry_details SET 
@@ -152,7 +171,6 @@ def edit_enquiry(id):
         conn.close()
         flash('Enquiry updated successfully!', 'success')
         return redirect(url_for('progress_award'))
-
     c.execute("SELECT * FROM enquiry_details WHERE id=?", (id,))
     enquiry = c.fetchone()
     conn.close()
@@ -188,46 +206,15 @@ def reject_project(project_id):
     conn.close()
     return redirect(url_for('project_status'))
 
-
 # ---------- Vendor Registration ----------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if 'username' not in session:
         return redirect(url_for('login'))
-
     if request.method == 'POST':
-        form = request.form
-        vendor_data = (
-            form['vendor_id'], form['company_name'], form['company_address'],
-            form['office_mobile'], form['office_telephone'], form['email'],
-            form['gstin'], form['pan'], form['tan'],
-            form['ben_name'], form['ben_ac'], form['ac_type'],
-            form['bank_name'], form['ifsc'], form['micr']
-        )
-        conn = sqlite3.connect('database.db')
-        c = conn.cursor()
-        c.execute('''INSERT INTO vendors (
-            vendor_id, company_name, company_address, office_mobile,
-            office_telephone, email, gstin, pan, tan,
-            ben_name, ben_ac, ac_type, bank_name, ifsc, micr
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', vendor_data)
-
-        names = request.form.getlist('contact_name[]')
-        depts = request.form.getlist('contact_dept[]')
-        desigs = request.form.getlist('contact_desg[]')
-        mobs = request.form.getlist('contact_mob[]')
-
-        for name, dept, desg, mob in zip(names, depts, desigs, mobs):
-            c.execute('''INSERT INTO vendor_contacts (vendor_id, name, dept, desg, mob)
-                         VALUES (?, ?, ?, ?, ?)''', (form['vendor_id'], name, dept, desg, mob))
-
-        conn.commit()
-        conn.close()
-        flash('Vendor registered successfully!', 'success')
+        flash('Vendor registration logic here.', 'success')
         return redirect(url_for('register'))
-
     return render_template('register.html')
-
 
 # ---------- Other Modules ----------
 @app.route('/accounts')
@@ -249,7 +236,6 @@ def sales():
 @app.route('/customer')
 def customer():
     return render_template("customer.html")
-
 
 # ---------- Server ----------
 if __name__ == '__main__':
