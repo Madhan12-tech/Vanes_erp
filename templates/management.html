@@ -1,92 +1,142 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Management Module</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <meta charset="UTF-8">
+  <title>Management</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <style>
-    .module-container {
-      display: grid;
-      grid-template-columns: 250px 1fr;
-      height: 100vh;
-    }
-
-    .sidebar {
+    body {
+      padding: 20px;
       background-color: #f8f9fa;
-      padding: 1rem;
-      border-right: 1px solid #ddd;
     }
-
-    .sidebar h5 {
-      margin-bottom: 1rem;
+    .module-card {
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s ease;
     }
-
-    .sidebar .nav-link {
-      margin-bottom: 0.5rem;
+    .module-card:hover {
+      transform: scale(1.02);
     }
-
-    .content {
-      padding: 2rem;
+    .dropdown-menu a {
+      color: #000;
+      text-decoration: none;
     }
-
-    .nested-links {
-      margin-left: 1rem;
-    }
-
-    .nested-links .nav-link {
-      font-size: 0.95rem;
+    .dropdown-menu a:hover {
+      background-color: #e9ecef;
     }
   </style>
 </head>
 <body>
-  <div class="module-container">
-    <div class="sidebar">
-      <h5>Management</h5>
-      <a class="nav-link fw-bold" href="#">Sales</a>
-      <div class="nested-links">
-        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#newEnquiryModal">New Enquiry</a>
-        <a class="nav-link" href="{{ url_for('progress_award') }}">Progress / Award Status</a>
+  <div class="container">
+    <h2 class="mb-4">Management Modules</h2>
+
+    <div class="row g-4">
+
+      <!-- Sales / Design Dropdown -->
+      <div class="col-md-4">
+        <div class="card module-card">
+          <div class="card-body">
+            <h5 class="card-title">Sales / Design</h5>
+            <div class="dropdown mt-2">
+              <button class="btn btn-outline-primary dropdown-toggle w-100" type="button" data-bs-toggle="dropdown">
+                Choose Action
+              </button>
+              <ul class="dropdown-menu w-100">
+                <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#newEnquiryModal">New Enquiry</a></li>
+                <li><a class="dropdown-item" href="/progress-award">Progress / Award</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
-      <a class="nav-link fw-bold" href="{{ url_for('production') }}">Production</a>
-      <a class="nav-link fw-bold" href="{{ url_for('accounts') }}">Accounts</a>
-      <a class="nav-link fw-bold" href="{{ url_for('employee_production') }}">Employee</a>
-    </div>
-    <div class="content">
-      <h2>Welcome to Management Dashboard</h2>
-      <p>Select a module from the left sidebar to continue.</p>
+
+      <!-- Other Modules Placeholder -->
+      <div class="col-md-4">
+        <div class="card module-card">
+          <div class="card-body">
+            <h5 class="card-title">Production</h5>
+            <a href="/production" class="btn btn-outline-secondary w-100 mt-2">Go</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <div class="card module-card">
+          <div class="card-body">
+            <h5 class="card-title">Accounts</h5>
+            <a href="/accounts" class="btn btn-outline-secondary w-100 mt-2">Go</a>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 
   <!-- New Enquiry Modal -->
   <div class="modal fade" id="newEnquiryModal" tabindex="-1" aria-labelledby="newEnquiryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-dialog modal-lg">
       <div class="modal-content">
-        <div class="modal-header">
+        <div class="modal-header bg-primary text-white">
           <h5 class="modal-title" id="newEnquiryModalLabel">New Enquiry</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
         </div>
-        <div class="modal-body" id="enquiryFormContainer">
-          <!-- AJAX-loaded content will appear here -->
-          <p class="text-center text-muted">Loading form...</p>
+        <div class="modal-body">
+          <form id="newEnquiryForm">
+            <div class="mb-3">
+              <label for="enquiry_id" class="form-label">Enquiry ID</label>
+              <input type="text" id="enquiry_id" name="enquiry_id" class="form-control" readonly>
+            </div>
+            <div class="mb-3">
+              <label for="enquiry_type" class="form-label">Enquiry Type</label>
+              <select class="form-select" name="enquiry_type" required>
+                <option value="">Select</option>
+                <option value="Tender">Tender</option>
+                <option value="Enquiry">Enquiry</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="contractor_type" class="form-label">Contractor Type</label>
+              <select class="form-select" name="contractor_type" required>
+                <option value="">Select</option>
+                <option value="Main Contractor">Main Contractor</option>
+                <option value="Sub Contractor">Sub Contractor</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="text-end">
+              <button type="submit" class="btn btn-success">Submit Enquiry</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
   </div>
 
+  <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const enquiryModal = document.getElementById('newEnquiryModal');
-      enquiryModal.addEventListener('show.bs.modal', function () {
-        fetch('/new-enquiry')
-          .then(response => response.text())
-          .then(html => {
-            document.getElementById('enquiryFormContainer').innerHTML = html;
-          })
-          .catch(err => {
-            document.getElementById('enquiryFormContainer').innerHTML = '<p class="text-danger">Failed to load form.</p>';
-          });
+    document.addEventListener('DOMContentLoaded', () => {
+      const enquiryIdInput = document.getElementById("enquiry_id");
+
+      fetch('/get_enquiry_id')
+        .then(res => res.json())
+        .then(data => {
+          enquiryIdInput.value = data.enquiry_id;
+        });
+
+      document.getElementById("newEnquiryForm").addEventListener("submit", function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+
+        fetch("/submit_enquiry", {
+          method: "POST",
+          body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message);
+          location.reload();
+        });
       });
     });
   </script>
