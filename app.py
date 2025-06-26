@@ -3,6 +3,7 @@ import sqlite3
 import openpyxl
 from io import BytesIO
 import random
+import os  
 
 app = Flask(__name__)
 app.secret_key = 'vanes_secret_key'
@@ -304,8 +305,9 @@ def sales():
 def customer():
     return render_template("customer.html")
 
-# ---------- Start ----------
+
+# At the bottom of app.py
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=10000)
-    
+    port = int(os.environ.get('PORT', 10000))  # Use PORT from environment or fallback to 10000
+    app.run(host='0.0.0.0', port=port)
