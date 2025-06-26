@@ -1,8 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 import sqlite3
 import openpyxl
 from io import BytesIO
 import random
+import os
 
 app = Flask(__name__)
 app.secret_key = 'vanes_secret_key'
@@ -53,44 +54,6 @@ def login():
             flash("Invalid credentials", "danger")
     return render_template('login.html')
 
-@app.route('/forgot', methods=['GET', 'POST'])
-def forgot():
-    if request.method == 'POST':
-        session['otp'] = str(random.randint(100000, 999999))
-        session['username_reset'] = request.form['username']
-        flash(f"OTP sent to your email: {session['otp']} (simulated)", "info")
-        return redirect(url_for('verify_otp'))
-    return render_template('forgot.html')
-
-@app.route('/verify_otp', methods=['GET', 'POST'])
-def verify_otp():
-    if request.method == 'POST':
-        entered = request.form['otp']
-        if 'otp' in session and entered == session['otp']:
-            flash("OTP verified! You can now reset your password.", "success")
-            return redirect(url_for('reset_password'))
-        else:
-            flash("Invalid OTP.", "danger")
-    return render_template('verify_otp.html')
-
-@app.route('/reset_password', methods=['GET', 'POST'])
-def reset_password():
-    if request.method == 'POST':
-        new_pass = request.form['password']
-        username = session.get('username_reset')
-        if username:
-            conn = sqlite3.connect('database.db')
-            c = conn.cursor()
-            c.execute("UPDATE users SET password=? WHERE username=?", (new_pass, username))
-            conn.commit()
-            conn.close()
-            flash("Password updated. Please login.", "success")
-            return redirect(url_for('login'))
-        else:
-            flash("Session expired. Try again.", "danger")
-            return redirect(url_for('forgot'))
-    return render_template('reset_password.html')
-
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
@@ -111,6 +74,7 @@ def management():
         return redirect(url_for('login'))
     return render_template('management.html')
 
+# ---------- Enquiry Form ----------
 @app.route('/get_enquiry_id')
 def get_enquiry_id():
     conn = sqlite3.connect('database.db')
@@ -142,6 +106,7 @@ def submit_enquiry():
 
     return jsonify({"message": "Enquiry submitted successfully!"})
 
+# ---------- Progress / Award ----------
 @app.route('/progress-award')
 def progress_award():
     if 'username' not in session:
@@ -154,6 +119,7 @@ def progress_award():
     conn.close()
     return render_template('progress_award.html', enquiries=enquiries)
 
+# ---------- Other Modules Placeholder ----------
 @app.route('/accounts')
 def accounts():
     return render_template("accounts.html")
@@ -180,8 +146,8 @@ def logout():
     flash("Logged out", "info")
     return redirect(url_for('login'))
 
-# ---------- Start ----------
+# ---------- Start Server ----------
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True)
-    
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host='0.0.0.0', port=port)
