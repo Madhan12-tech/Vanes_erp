@@ -1,89 +1,52 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Management</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="p-4">
-  <h3>Management</h3>
-  <ul class="list-group">
-    <li class="list-group-item">
-      <strong>Sales</strong>
-      <ul>
-        <li><a href="#" data-bs-toggle="modal" data-bs-target="#enquiryModal">New Enquiry</a></li>
-        <li><a href="{{ url_for('progress_award') }}">Progress / Award Status</a></li>
-      </ul>
-    </li>
-    <!-- Add other management categories like Production, Accounts etc. -->
-  </ul>
+<body class="bg-light">
+  <div class="container mt-5">
+    <h2 class="text-center mb-4">Management Module</h2>
 
-  <!-- New Enquiry Modal -->
-  <div class="modal fade" id="enquiryModal" tabindex="-1" aria-labelledby="enquiryModalLabel" aria-hidden="true">
-    <div class="modal-dialog">
-      <div class="modal-content">
-        <form id="enquiryForm">
-          <div class="modal-header">
-            <h5 class="modal-title" id="enquiryModalLabel">New Enquiry</h5>
-            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-          </div>
-          <div class="modal-body">
-            <input type="hidden" name="enquiry_id" id="enquiry_id" class="form-control" readonly>
-
-            <div class="mb-2">
-              <label>Enquiry Type</label>
-              <select name="enquiry_type" class="form-control" required>
-                <option value="">Select</option>
-                <option value="Tender">Tender</option>
-                <option value="Enquiry">Enquiry</option>
-              </select>
-            </div>
-            <div class="mb-2">
-              <label>Contractor Type</label>
-              <select name="contractor_type" class="form-control" required>
-                <option value="">Select</option>
-                <option value="Main Contractor">Main Contractor</option>
-                <option value="Sub Contractor">Sub Contractor</option>
-              </select>
-            </div>
-            <div class="mb-2">
-              <label>Client Name</label>
-              <input type="text" name="client_name" class="form-control" required>
-            </div>
-            <div class="mb-2">
-              <label>Project Title</label>
-              <input type="text" name="project_title" class="form-control" required>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button type="submit" class="btn btn-primary">Submit Enquiry</button>
-          </div>
-        </form>
+    <!-- Sales Section -->
+    <div class="card mb-4 shadow">
+      <div class="card-header bg-primary text-white">
+        Sales
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <a href="{{ url_for('new_enquiry_page') }}" class="text-decoration-none">New Enquiry</a>
+          </li>
+          <li class="list-group-item">
+            <a href="{{ url_for('progress_award') }}" class="text-decoration-none">Progress / Award Status</a>
+          </li>
+        </ul>
       </div>
     </div>
+
+    <!-- Production Section -->
+    <div class="card mb-4 shadow">
+      <div class="card-header bg-success text-white">
+        Production
+      </div>
+      <div class="card-body">
+        <ul class="list-group list-group-flush">
+          <li class="list-group-item">
+            <a href="{{ url_for('new_project') }}" class="text-decoration-none">New Project</a>
+          </li>
+          <li class="list-group-item">
+            <a href="{{ url_for('project_status') }}" class="text-decoration-none">Project Status</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="text-center mt-4">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-secondary">Back to Dashboard</a>
+    </div>
   </div>
-
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    // Load Enquiry ID
-    fetch('/get_enquiry_id')
-      .then(response => response.json())
-      .then(data => {
-        document.getElementById('enquiry_id').value = data.enquiry_id;
-      });
-
-    document.getElementById('enquiryForm').addEventListener('submit', function (e) {
-      e.preventDefault();
-      const formData = new FormData(this);
-      fetch('/submit_enquiry', {
-        method: 'POST',
-        body: formData
-      }).then(res => res.json())
-        .then(data => {
-          alert(data.message);
-          window.location.href = "/progress-award";
-        });
-    });
-  </script>
 </body>
 </html>
