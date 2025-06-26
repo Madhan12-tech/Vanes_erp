@@ -165,6 +165,57 @@ def progress_award():
     conn.close()
     return render_template('progress_award.html', enquiries=enquiries)
 
+# ---------- Production Module ----------
+@app.route('/get_project_id')
+def get_project_id():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT COUNT(*) FROM project_details")
+    count = c.fetchone()[0] + 1
+    project_id = f"TEI/Project/{count:03}"
+    conn.close()
+    return jsonify({"project_id": project_id})
+
+@app.route('/submit_project', methods=['POST'])
+def submit_project():
+    data = request.form
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute('''INSERT INTO project_details (
+        project_id, client_name, project_name, location, start_date, end_date, remarks, status
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)''', (
+        data['project_id'], data['client_name'], data['project_name'],
+        data['location'], data['start_date'], data['end_date'],
+        data['remarks'], 'In Progress'))
+    conn.commit()
+    conn.close()
+    return jsonify({"message": "Project submitted successfully!"})
+
+@app.route('/project-status')
+def project_status():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT id, project_id, client_name, project_name, status FROM project_details")
+    projects = c.fetchall()
+    conn.close()
+    return render_template('project_status.html', projects=projects)
+
+# ---------- Add to init_db() ----------
+c.execute('''CREATE TABLE IF NOT EXISTS project_details (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    project_id TEXT,
+    client_name TEXT,
+    project_name TEXT,
+    location TEXT,
+    start_date TEXT,
+    end_date TEXT,
+    remarks TEXT,
+    status TEXT DEFAULT 'In Progress'
+)''')
+
+
 # ---------- Vendor Registration ----------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
