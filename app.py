@@ -58,7 +58,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ---------- Auth Routes ----------
+# ---------- Authentication ----------
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -117,7 +117,7 @@ def reset_password():
             return redirect(url_for('login'))
     return render_template('reset_password.html')
 
-# ---------- Dashboard and Modules ----------
+# ---------- Dashboard ----------
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
@@ -138,16 +138,15 @@ def management():
         return redirect(url_for('login'))
     return render_template('management.html')
 
-# ---------- Enquiry Module ----------
+# ---------- Enquiry ----------
 @app.route('/get_enquiry_id')
 def get_enquiry_id():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute("SELECT COUNT(*) FROM enquiry_details")
     count = c.fetchone()[0] + 1
-    enquiry_id = f"TEI/Enquiry/{count:03}"
     conn.close()
-    return jsonify({"enquiry_id": enquiry_id})
+    return jsonify({"enquiry_id": f"TEI/Enquiry/{count:03}"})
 
 @app.route('/submit_enquiry', methods=['POST'])
 def submit_enquiry():
@@ -159,6 +158,11 @@ def submit_enquiry():
     ) VALUES (?, ?, ?, ?, ?, ?)''', (
         data['enquiry_id'], data['enquiry_type'], data['contractor_type'],
         data['client_name'], data['project_title'], 'In Progress'))
+
+    # Also insert into project_details
+    c.execute("INSERT INTO project_details (project_id, client_name, project_title, status) VALUES (?, ?, ?, ?)",
+              (data['enquiry_id'], data['client_name'], data['project_title'], 'Pending'))
+
     conn.commit()
     conn.close()
     return jsonify({"message": "Enquiry submitted successfully!"})
@@ -169,28 +173,12 @@ def progress_award():
         return redirect(url_for('login'))
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute("SELECT id, enquiry_id, client_name, project_title, status FROM enquiry_details")
+    c.execute("SELECT * FROM enquiry_details")
     enquiries = c.fetchall()
     conn.close()
     return render_template('progress_award.html', enquiries=enquiries)
 
-# ---------- Project Module ----------
-@app.route('/new_project', methods=['GET', 'POST'])
-def new_project():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    if request.method == 'POST':
-        form = request.form
-        conn = sqlite3.connect('database.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO project_details (project_id, client_name, project_title, status) VALUES (?, ?, ?, ?)",
-                  (form['project_id'], form['client_name'], form['project_title'], form['status']))
-        conn.commit()
-        conn.close()
-        flash('Project added successfully!', 'success')
-        return redirect(url_for('new_project'))
-    return render_template('new_project.html')
-
+# ---------- Projects ----------
 @app.route('/project_status')
 def project_status():
     if 'username' not in session:
@@ -202,11 +190,21 @@ def project_status():
     conn.close()
     return render_template('project_status.html', projects=projects)
 
-# ---------- Vendor Registration ----------
+@app.route('/approve_project/<int:id>', methods=['POST'])
+def approve_project(id):
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("UPDATE project_details SET status='Approved' WHERE id=?", (id,))
+    conn.commit()
+    conn.close()
+    return redirect(url_for('project_status'))
+
+# ---------- Vendor ----------
 @app.route('/register', methods=['GET', 'POST'])
 def register():
     if 'username' not in session:
         return redirect(url_for('login'))
+
     if request.method == 'POST':
         form = request.form
         vendor_data = (
@@ -224,7 +222,6 @@ def register():
             ben_name, ben_ac, ac_type, bank_name, ifsc, micr
         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', vendor_data)
 
-        vendor_id = form['vendor_id']
         names = request.form.getlist('contact_name[]')
         depts = request.form.getlist('contact_dept[]')
         desigs = request.form.getlist('contact_desg[]')
@@ -232,12 +229,13 @@ def register():
 
         for name, dept, desg, mob in zip(names, depts, desigs, mobs):
             c.execute('''INSERT INTO vendor_contacts (vendor_id, name, dept, desg, mob)
-                         VALUES (?, ?, ?, ?, ?)''', (vendor_id, name, dept, desg, mob))
+                         VALUES (?, ?, ?, ?, ?)''', (form['vendor_id'], name, dept, desg, mob))
 
         conn.commit()
         conn.close()
         flash('Vendor registered successfully!', 'success')
         return redirect(url_for('register'))
+
     return render_template('register.html')
 
 @app.route('/vendors')
@@ -266,11 +264,7 @@ def export():
     wb = openpyxl.Workbook()
     ws1 = wb.active
     ws1.title = "Vendors"
-    ws1.append([
-        "ID", "Vendor ID", "Company Name", "Company Address", "Office Mobile",
-        "Office Telephone", "Email", "GSTIN", "PAN", "TAN",
-        "Beneficiary Name", "Account Number", "Account Type", "Bank Name", "IFSC", "MICR"
-    ])
+    ws1.append(["ID", "Vendor ID", "Company Name", "Company Address", "Office Mobile", "Office Telephone", "Email", "GSTIN", "PAN", "TAN", "Ben Name", "Ben AC", "AC Type", "Bank Name", "IFSC", "MICR"])
     for row in vendors:
         ws1.append(row)
 
@@ -284,7 +278,7 @@ def export():
     output.seek(0)
     return send_file(output, as_attachment=True, download_name="vendors.xlsx", mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-# ---------- Placeholder Routes ----------
+# ---------- Placeholder Modules ----------
 @app.route('/accounts')
 def accounts():
     return render_template("accounts.html")
@@ -305,8 +299,8 @@ def sales():
 def customer():
     return render_template("customer.html")
 
-# ---------- Start ----------
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=10000)
+    port = int(os.environ.get('PORT', 10000))
+    app.run(host='0.0.0.0', port=port)
     
