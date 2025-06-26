@@ -51,10 +51,14 @@
           </td>
           <td>
             {% if p[4] != 'Approved' %}
-              <a href="{{ url_for('approve_project', project_id=p[1]) }}" class="btn btn-success btn-sm">Approve</a>
+              <form action="{{ url_for('approve_project', id=p[0]) }}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-success btn-sm">Approve</button>
+              </form>
             {% endif %}
             {% if p[4] != 'Rejected' %}
-              <a href="{{ url_for('reject_project', project_id=p[1]) }}" class="btn btn-danger btn-sm">Reject</a>
+              <form action="{{ url_for('reject_project', id=p[0]) }}" method="post" class="d-inline">
+                <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+              </form>
             {% endif %}
           </td>
         </tr>
