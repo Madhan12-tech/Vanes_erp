@@ -7,26 +7,25 @@ import random
 app = Flask(__name__)
 app.secret_key = 'vanes_secret_key'
 
-# ---------- Database Setup ----------
+# ---------- DB Initialization ----------
 def init_db():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT, password TEXT
-    )''')
-
-    c.execute('''CREATE TABLE IF NOT EXISTS enquiries (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        enquiry_id TEXT
-    )''')
 
     c.execute('''CREATE TABLE IF NOT EXISTS enquiry_details (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         enquiry_id TEXT,
         enquiry_type TEXT,
-        contractor_type TEXT
+        contractor_type TEXT,
+        client_name TEXT,
+        project_title TEXT,
+        status TEXT DEFAULT 'In Progress'
+    )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT,
+        password TEXT
     )''')
 
     c.execute("SELECT * FROM users WHERE username='admin'")
@@ -36,7 +35,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ---------- Auth ----------
+# ---------- Routes ----------
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -49,19 +48,11 @@ def login():
         conn.close()
         if user:
             session['username'] = uname
-            flash("Login successful", "success")
             return redirect(url_for('dashboard'))
         else:
             flash("Invalid credentials", "danger")
-    return render_template("login.html")
+    return render_template('login.html')
 
-@app.route('/logout')
-def logout():
-    session.pop('username', None)
-    flash("Logged out", "info")
-    return redirect(url_for('login'))
-
-# ---------- Dashboard ----------
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
@@ -74,51 +65,47 @@ def dashboard():
         {"name": "Sales / Design", "url": "/sales"},
         {"name": "Customer", "url": "/customer"}
     ]
-    return render_template("dashboard.html", modules=modules)
+    return render_template('dashboard.html', modules=modules)
 
-# ---------- Management ----------
 @app.route('/management')
 def management():
     if 'username' not in session:
         return redirect(url_for('login'))
-    return render_template("management.html")
+    return render_template('management.html')
 
-# ---------- Sales: New Enquiry ----------
-@app.route('/new-enquiry')
-def new_enquiry_page():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    # Auto generate enquiry_id
+# ---------- New Enquiry ----------
+@app.route('/get_enquiry_id')
+def get_enquiry_id():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM enquiries")
+    c.execute("SELECT COUNT(*) FROM enquiry_details")
     count = c.fetchone()[0] + 1
     enquiry_id = f"TEI/Enquiry/{count:03}"
-    c.execute("INSERT INTO enquiries (enquiry_id) VALUES (?)", (enquiry_id,))
-    conn.commit()
     conn.close()
-
-    return render_template('new_enquiry.html', enquiry_id=enquiry_id)
+    return jsonify({"enquiry_id": enquiry_id})
 
 @app.route('/submit_enquiry', methods=['POST'])
 def submit_enquiry():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-
-    enquiry_id = request.form.get("enquiry_id")
-    enquiry_type = request.form.get("enquiry_type")
-    contractor_type = request.form.get("contractor_type")
+    data = request.form
+    enquiry_id = data.get("enquiry_id")
+    enquiry_type = data.get("enquiry_type")
+    contractor_type = data.get("contractor_type")
+    client_name = data.get("client_name")
+    project_title = data.get("project_title")
 
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute('''INSERT INTO enquiry_details (enquiry_id, enquiry_type, contractor_type)
-                 VALUES (?, ?, ?)''', (enquiry_id, enquiry_type, contractor_type))
+    c.execute('''INSERT INTO enquiry_details (
+        enquiry_id, enquiry_type, contractor_type, client_name, project_title, status
+    ) VALUES (?, ?, ?, ?, ?, ?)''', (
+        enquiry_id, enquiry_type, contractor_type, client_name, project_title, 'In Progress'
+    ))
     conn.commit()
     conn.close()
+
     return jsonify({"message": "Enquiry submitted successfully!"})
 
-# ---------- Sales: Progress / Award ----------
+# ---------- Progress / Award ----------
 @app.route('/progress-award')
 def progress_award():
     if 'username' not in session:
@@ -126,43 +113,39 @@ def progress_award():
 
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
-    c.execute("SELECT enquiry_id, enquiry_type, contractor_type FROM enquiry_details")
+    c.execute("SELECT id, enquiry_id, client_name, project_title, status FROM enquiry_details")
     enquiries = c.fetchall()
     conn.close()
-    return render_template("progress_award.html", enquiries=enquiries)
+    return render_template('progress_award.html', enquiries=enquiries)
 
-# ---------- Other Modules ----------
+# ---------- Other Modules Placeholder ----------
 @app.route('/accounts')
 def accounts():
-    if 'username' not in session:
-        return redirect(url_for('login'))
     return render_template("accounts.html")
 
 @app.route('/project')
 def project():
-    if 'username' not in session:
-        return redirect(url_for('login'))
     return render_template("project.html")
 
 @app.route('/production')
 def production():
-    if 'username' not in session:
-        return redirect(url_for('login'))
     return render_template("production.html")
 
 @app.route('/sales')
 def sales():
-    if 'username' not in session:
-        return redirect(url_for('login'))
     return render_template("sales.html")
 
 @app.route('/customer')
 def customer():
-    if 'username' not in session:
-        return redirect(url_for('login'))
     return render_template("customer.html")
 
-# ---------- Run ----------
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash("Logged out", "info")
+    return redirect(url_for('login'))
+
+# ---------- Start ----------
 if __name__ == '__main__':
     init_db()
-    app.run(host='0.0.0.0', port=10000)
+    app.run(debug=True, port=10000)
