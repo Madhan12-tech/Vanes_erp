@@ -2,9 +2,5 @@ services:
   - type: web
     name: vanes-erp
     env: python
-    buildCommand: ""
-    startCommand: python app.py
-    plan: free
-    region: singapore
-    branch: main
-    autoDeploy: true
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
