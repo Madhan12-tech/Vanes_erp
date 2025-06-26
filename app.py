@@ -3,7 +3,7 @@ import sqlite3
 import openpyxl
 from io import BytesIO
 import random
-import os  
+import os
 
 app = Flask(__name__)
 app.secret_key = 'vanes_secret_key'
@@ -305,15 +305,8 @@ def sales():
 def customer():
     return render_template("customer.html")
 
-@app.route('/new_enquiry')
-def new_enquiry():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template('new_enquiry.html')
-
-
-# At the bottom of app.py
+# ---------- Start ----------
 if __name__ == '__main__':
     init_db()
-    port = int(os.environ.get('PORT', 10000))  # Use PORT from environment or fallback to 10000
-    app.run(host='0.0.0.0', port=port)
+    app.run(debug=True, port=10000)
+    
