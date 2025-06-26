@@ -4,7 +4,8 @@ import openpyxl
 from io import BytesIO
 import random
 import os
-app = Flask(name) app.secret_key = 'vanes_secret_key'
+app = Flask(name) 
+app.secret_key = 'vanes_secret_key'
 
 ---------- DB Initialization ----------
 
