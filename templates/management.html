@@ -2,61 +2,37 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Progress / Award Status</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <style>
-    .badge-in-progress {
-      background-color: #ffc107;
-      color: #000;
-    }
-    .badge-awarded {
-      background-color: #28a745;
-    }
-    .table td, .table th {
-      vertical-align: middle;
-    }
-  </style>
+  <title>Management</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
 </head>
-<body class="bg-light">
-  <div class="container py-5">
-    <h2 class="mb-4 text-center text-primary">Progress / Award Status</h2>
+<body>
+  <div class="container mt-5">
+    <h2>Management</h2>
 
-    <table class="table table-bordered table-striped align-middle shadow-sm bg-white">
-      <thead class="table-primary">
-        <tr>
-          <th scope="col">ID</th>
-          <th scope="col">Enquiry ID</th>
-          <th scope="col">Client Name</th>
-          <th scope="col">Project Title</th>
-          <th scope="col">Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for row in enquiries %}
-        <tr>
-          <td>{{ row[0] }}</td>
-          <td>{{ row[1] }}</td>
-          <td>{{ row[2] }}</td>
-          <td>{{ row[3] }}</td>
-          <td>
-            {% if row[4] == 'Awarded' %}
-              <span class="badge badge-awarded">Awarded</span>
-            {% else %}
-              <span class="badge badge-in-progress">In Progress</span>
-            {% endif %}
-          </td>
-        </tr>
-        {% else %}
-        <tr>
-          <td colspan="5" class="text-center text-muted">No enquiries found.</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
+    <div class="accordion mt-4" id="managementAccordion">
+      <!-- Sales Section -->
+      <div class="accordion-item">
+        <h2 class="accordion-header" id="salesHeading">
+          <button class="accordion-button" type="button" data-bs-toggle="collapse" data-bs-target="#salesCollapse">
+            Sales
+          </button>
+        </h2>
+        <div id="salesCollapse" class="accordion-collapse collapse show" data-bs-parent="#managementAccordion">
+          <div class="accordion-body">
+            <a href="{{ url_for('new_enquiry_modal') }}" class="btn btn-primary me-2">New Enquiry</a>
+            <a href="{{ url_for('progress_award') }}" class="btn btn-secondary">Progress / Award Status</a>
+          </div>
+        </div>
+      </div>
 
-    <div class="text-center mt-4">
-      <a href="{{ url_for('management') }}" class="btn btn-secondary">← Back to Management</a>
+      <!-- Add more sections like Production, Accounts, etc. later -->
+    </div>
+
+    <div class="mt-4">
+      <a href="{{ url_for('dashboard') }}" class="btn btn-link">Back to Dashboard</a>
     </div>
   </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
