@@ -58,7 +58,8 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ---------- Authentication ----------
+
+# ---------- Auth ----------
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -76,11 +77,13 @@ def login():
             flash("Invalid credentials", "danger")
     return render_template('login.html')
 
+
 @app.route('/logout')
 def logout():
     session.pop('username', None)
     flash("Logged out", "info")
     return redirect(url_for('login'))
+
 
 @app.route('/forgot', methods=['GET', 'POST'])
 def forgot():
@@ -90,6 +93,7 @@ def forgot():
         flash(f"OTP sent: {session['otp']} (simulated)", "info")
         return redirect(url_for('verify_otp'))
     return render_template('forgot.html')
+
 
 @app.route('/verify_otp', methods=['GET', 'POST'])
 def verify_otp():
@@ -101,6 +105,7 @@ def verify_otp():
         else:
             flash("Invalid OTP", "danger")
     return render_template('verify_otp.html')
+
 
 @app.route('/reset_password', methods=['GET', 'POST'])
 def reset_password():
@@ -117,6 +122,7 @@ def reset_password():
             return redirect(url_for('login'))
     return render_template('reset_password.html')
 
+
 # ---------- Dashboard ----------
 @app.route('/dashboard')
 def dashboard():
@@ -132,11 +138,13 @@ def dashboard():
     ]
     return render_template('dashboard.html', modules=modules)
 
+
 @app.route('/management')
 def management():
     if 'username' not in session:
         return redirect(url_for('login'))
     return render_template('management.html')
+
 
 # ---------- Enquiry ----------
 @app.route('/get_enquiry_id')
@@ -146,7 +154,9 @@ def get_enquiry_id():
     c.execute("SELECT COUNT(*) FROM enquiry_details")
     count = c.fetchone()[0] + 1
     conn.close()
-    return jsonify({"enquiry_id": f"TEI/Enquiry/{count:03}"})
+    enquiry_id = f"TEI/Enquiry/{count:03}"
+    return jsonify({"enquiry_id": enquiry_id})
+
 
 @app.route('/submit_enquiry', methods=['POST'])
 def submit_enquiry():
@@ -166,6 +176,7 @@ def submit_enquiry():
     conn.close()
     return jsonify({"message": "Enquiry submitted successfully!"})
 
+
 @app.route('/progress-award')
 def progress_award():
     if 'username' not in session:
@@ -177,25 +188,8 @@ def progress_award():
     conn.close()
     return render_template('progress_award.html', enquiries=enquiries)
 
-# ---------- New Project (Fixed Route) ----------
-@app.route('/new_project', methods=['GET', 'POST'])
-def new_project():
-    if 'username' not in session:
-        return redirect(url_for('login'))
 
-    if request.method == 'POST':
-        form = request.form
-        conn = sqlite3.connect('database.db')
-        c = conn.cursor()
-        c.execute("INSERT INTO project_details (project_id, client_name, project_title, status) VALUES (?, ?, ?, ?)",
-                  (form['project_id'], form['client_name'], form['project_title'], form['status']))
-        conn.commit()
-        conn.close()
-        flash('Project added successfully!', 'success')
-        return redirect(url_for('new_project'))
-
-    return render_template('new_project.html')
-
+# ---------- Projects ----------
 @app.route('/project_status')
 def project_status():
     if 'username' not in session:
@@ -207,6 +201,7 @@ def project_status():
     conn.close()
     return render_template('project_status.html', projects=projects)
 
+
 @app.route('/approve_project/<int:id>', methods=['POST'])
 def approve_project(id):
     conn = sqlite3.connect('database.db')
@@ -215,6 +210,7 @@ def approve_project(id):
     conn.commit()
     conn.close()
     return redirect(url_for('project_status'))
+
 
 # ---------- Vendor ----------
 @app.route('/register', methods=['GET', 'POST'])
@@ -255,6 +251,7 @@ def register():
 
     return render_template('register.html')
 
+
 @app.route('/vendors')
 def vendors():
     if 'username' not in session:
@@ -265,6 +262,7 @@ def vendors():
     vendors = c.fetchall()
     conn.close()
     return render_template("vendors.html", vendors=vendors)
+
 
 @app.route('/export')
 def export():
@@ -295,17 +293,8 @@ def export():
     output.seek(0)
     return send_file(output, as_attachment=True, download_name="vendors.xlsx", mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
 
-@app.route('/get_enquiry_id')
-def get_enquiry_id():
-    conn = sqlite3.connect('database.db')
-    c = conn.cursor()
-    c.execute("SELECT COUNT(*) FROM enquiry_details")
-    count = c.fetchone()[0] + 1
-    conn.close()
-    enquiry_id = f"TEI/Enquiry/{count:03}"
-    return jsonify({'enquiry_id': enquiry_id})
 
-# ---------- Placeholder Modules ----------
+# ---------- Placeholder Routes ----------
 @app.route('/accounts')
 def accounts():
     return render_template("accounts.html")
@@ -326,7 +315,7 @@ def sales():
 def customer():
     return render_template("customer.html")
 
-# ---------- Run ----------
+# ---------- Start App ----------
 if __name__ == '__main__':
     init_db()
     port = int(os.environ.get('PORT', 10000))
