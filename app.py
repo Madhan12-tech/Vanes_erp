@@ -1,5 +1,9 @@
-from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, jsonify import sqlite3 import openpyxl from io import BytesIO import random import os
-
+from flask import Flask, render_template, request, redirect, url_for, flash, session, send_file, jsonify
+import sqlite3
+import openpyxl
+from io import BytesIO
+import random
+import os
 app = Flask(name) app.secret_key = 'vanes_secret_key'
 
 ---------- DB Initialization ----------
