@@ -10,7 +10,8 @@
     <h3 class="mb-4 text-center">Management Panel</h3>
     <div class="list-group">
       <h5 class="mb-2">Sales</h5>
-      <a href="{{ url_for('new_enquiry_page') }}" class="list-group-item list-group-item-action">New Enquiry</a>
+      <!-- Trigger modal via JavaScript -->
+      <a href="#" class="list-group-item list-group-item-action" data-bs-toggle="modal" data-bs-target="#newEnquiryModal">New Enquiry</a>
       <a href="{{ url_for('progress_award') }}" class="list-group-item list-group-item-action">Progress / Award Status</a>
 
       <h5 class="mt-4 mb-2">Production</h5>
@@ -27,5 +28,17 @@
       <a href="#" class="list-group-item list-group-item-action">Raw Materials</a>
     </div>
   </div>
+
+  <!-- Optional Modal for New Enquiry -->
+  <div class="modal fade" id="newEnquiryModal" tabindex="-1" aria-labelledby="newEnquiryModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <!-- You should include your enquiry form here -->
+        <!-- Example: {% include 'new_enquiry.html' %} -->
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
