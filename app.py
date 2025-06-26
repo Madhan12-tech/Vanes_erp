@@ -3,6 +3,7 @@ import sqlite3
 import openpyxl
 from io import BytesIO
 import random
+from flask import jsonify
 
 app = Flask(__name__)
 app.secret_key = 'vanes_secret_key'
@@ -276,6 +277,35 @@ def vendors():
     vendors = c.fetchall()
     conn.close()
     return render_template("vendors.html", vendors=vendors)
+
+@app.route('/get_enquiry_id')
+def get_enquiry_id():
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("CREATE TABLE IF NOT EXISTS enquiries (id INTEGER PRIMARY KEY AUTOINCREMENT, enquiry_id TEXT)")
+    c.execute("SELECT COUNT(*) FROM enquiries")
+    count = c.fetchone()[0] + 1
+    enquiry_id = f"TEI/Enquiry/{count:03}"
+    c.execute("INSERT INTO enquiries (enquiry_id) VALUES (?)", (enquiry_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({"enquiry_id": enquiry_id})
+
+@app.route('/submit_enquiry', methods=['POST'])
+def submit_enquiry():
+    enquiry_id = request.form.get("enquiry_id")
+    enquiry_type = request.form.get("enquiry_type")
+    contractor_type = request.form.get("contractor_type")
+
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("CREATE TABLE IF NOT EXISTS enquiry_details (id INTEGER PRIMARY KEY AUTOINCREMENT, enquiry_id TEXT, enquiry_type TEXT, contractor_type TEXT)")
+    c.execute("INSERT INTO enquiry_details (enquiry_id, enquiry_type, contractor_type) VALUES (?, ?, ?)",
+              (enquiry_id, enquiry_type, contractor_type))
+    conn.commit()
+    conn.close()
+
+    return jsonify({"message": "Enquiry submitted successfully!"})
 
 @app.route('/export')
 def export():
