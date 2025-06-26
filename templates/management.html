@@ -2,82 +2,78 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Management Dashboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Management</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
+<body class="p-4">
+  <div class="container">
+    <h2 class="mb-4">Management</h2>
 
-  <div class="container py-4">
-    <h2 class="mb-4">Management Dashboard</h2>
+    <!-- New Enquiry Button -->
+    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#enquiryModal" id="openEnquiryModal">
+      + New Enquiry
+    </button>
 
-    <div class="row row-cols-1 row-cols-md-2 g-3">
-      <div class="col">
-        <button id="newEnquiryBtn" class="btn btn-primary w-100">➕ New Enquiry</button>
-      </div>
-      <div class="col">
-        <a href="/progress-award" class="btn btn-outline-secondary w-100">📊 Progress / Award Status</a>
-      </div>
-      <div class="col">
-        <a href="/new-project" class="btn btn-outline-success w-100">🏗️ New Project</a>
-      </div>
-      <div class="col">
-        <a href="/dc-invoice" class="btn btn-outline-info w-100">🧾 DC / Invoice</a>
-      </div>
-      <div class="col">
-        <a href="/mrs-sheet" class="btn btn-outline-warning w-100">📋 MRS Sheet</a>
-      </div>
-      <div class="col">
-        <a href="/consolidated-report" class="btn btn-outline-dark w-100">📈 Consolidated Report</a>
-      </div>
-      <div class="col">
-        <a href="/employee-production" class="btn btn-outline-primary w-100">👨‍🏭 Employee Production</a>
-      </div>
-      <div class="col">
-        <a href="/raw-coils" class="btn btn-outline-secondary w-100">🌀 Raw Coils</a>
-      </div>
-      <div class="col">
-        <a href="/raw-bolts" class="btn btn-outline-success w-100">🔩 Raw Bolts</a>
-      </div>
-      <div class="col">
-        <a href="/raw-gaskets" class="btn btn-outline-info w-100">🧰 Raw Gaskets</a>
-      </div>
-      <div class="col">
-        <a href="/raw-reports" class="btn btn-outline-warning w-100">📚 Raw Material Reports</a>
-      </div>
-    </div>
-  </div>
-
-  <!-- New Enquiry Modal -->
-  <div class="modal fade" id="newEnquiryModal" tabindex="-1" aria-labelledby="newEnquiryModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-xl modal-dialog-scrollable">
-      <div class="modal-content">
-        <div class="modal-header">
-          <h5 class="modal-title" id="newEnquiryModalLabel">📝 New Enquiry Form</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
-        <div class="modal-body" id="newEnquiryContent">
-          <!-- Enquiry form will load here via AJAX -->
-          <div class="text-center p-4">Loading form...</div>
+    <!-- Enquiry Modal -->
+    <div class="modal fade" id="enquiryModal" tabindex="-1" aria-labelledby="enquiryModalLabel" aria-hidden="true">
+      <div class="modal-dialog">
+        <div class="modal-content">
+          <form id="enquiryForm">
+            <div class="modal-header">
+              <h5 class="modal-title">New Enquiry</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+              <div class="mb-3">
+                <label>Enquiry ID</label>
+                <input type="text" class="form-control" name="enquiry_id" id="enquiry_id" readonly>
+              </div>
+              <div class="mb-3">
+                <label>Enquiry Type</label>
+                <select class="form-control" name="enquiry_type">
+                  <option value="Tender">Tender</option>
+                  <option value="Enquiry">Enquiry</option>
+                </select>
+              </div>
+              <div class="mb-3">
+                <label>Contractor Type</label>
+                <select class="form-control" name="contractor_type">
+                  <option value="Main Contractor">Main Contractor</option>
+                  <option value="Sub Contractor">Sub Contractor</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+            </div>
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-success">Submit</button>
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+          </form>
         </div>
       </div>
     </div>
-  </div>
 
-  <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-  <script>
-    $(document).ready(function () {
-      $('#newEnquiryBtn').click(function () {
-        $.get('/new-enquiry', function (data) {
-          $('#newEnquiryContent').html(data);
-          const modal = new bootstrap.Modal(document.getElementById('newEnquiryModal'));
-          modal.show();
+    <!-- Bootstrap JS (needed for modal) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+      // Load enquiry ID when modal opens
+      $('#openEnquiryModal').click(function () {
+        $.get('/get_enquiry_id', function (data) {
+          $('#enquiry_id').val(data.enquiry_id);
         });
       });
-    });
-  </script>
 
+      // Submit form via AJAX
+      $('#enquiryForm').submit(function (e) {
+        e.preventDefault();
+        $.post('/submit_enquiry', $(this).serialize(), function (res) {
+          alert(res.message);
+          $('#enquiryModal').modal('hide');
+        });
+      });
+    </script>
+  </div>
 </body>
 </html>
