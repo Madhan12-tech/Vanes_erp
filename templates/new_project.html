@@ -7,41 +7,42 @@
 </head>
 <body class="bg-light">
   <div class="container mt-5">
-    <h3 class="mb-4">Add New Project</h3>
-
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        {% for category, message in messages %}
-          <div class="alert alert-{{ category }}">{{ message }}</div>
-        {% endfor %}
-      {% endif %}
-    {% endwith %}
-
-    <form method="POST" class="card p-4 shadow-sm">
-      <div class="mb-3">
-        <label for="project_id" class="form-label">Project ID</label>
-        <input type="text" class="form-control" id="project_id" name="project_id" required>
+    <h2 class="mb-4 text-center">New Project Entry</h2>
+    <div class="card shadow">
+      <div class="card-body">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+          {% if messages %}
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+          {% endif %}
+        {% endwith %}
+        <form method="POST" action="{{ url_for('new_project') }}">
+          <div class="mb-3">
+            <label for="project_id" class="form-label">Project ID</label>
+            <input type="text" class="form-control" id="project_id" name="project_id" required>
+          </div>
+          <div class="mb-3">
+            <label for="client_name" class="form-label">Client Name</label>
+            <input type="text" class="form-control" id="client_name" name="client_name" required>
+          </div>
+          <div class="mb-3">
+            <label for="project_title" class="form-label">Project Title</label>
+            <input type="text" class="form-control" id="project_title" name="project_title" required>
+          </div>
+          <div class="mb-3">
+            <label for="status" class="form-label">Status</label>
+            <select class="form-select" id="status" name="status" required>
+              <option value="Pending">Pending</option>
+              <option value="Approved">Approved</option>
+              <option value="In Progress">In Progress</option>
+              <option value="Completed">Completed</option>
+            </select>
+          </div>
+          <button type="submit" class="btn btn-primary w-100">Submit</button>
+        </form>
       </div>
-      <div class="mb-3">
-        <label for="client_name" class="form-label">Client Name</label>
-        <input type="text" class="form-control" id="client_name" name="client_name" required>
-      </div>
-      <div class="mb-3">
-        <label for="project_title" class="form-label">Project Title</label>
-        <input type="text" class="form-control" id="project_title" name="project_title" required>
-      </div>
-      <div class="mb-3">
-        <label for="status" class="form-label">Status</label>
-        <select class="form-select" id="status" name="status" required>
-          <option value="Pending" selected>Pending</option>
-          <option value="Approved">Approved</option>
-          <option value="Rejected">Rejected</option>
-        </select>
-      </div>
-      <button type="submit" class="btn btn-primary w-100">Submit</button>
-    </form>
-
-    <a href="{{ url_for('dashboard') }}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+    </div>
   </div>
 </body>
 </html>
