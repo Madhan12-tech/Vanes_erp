@@ -183,5 +183,5 @@ def logout():
 # ---------- Start ----------
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=10000)
+    app.run(debug=True))
     
