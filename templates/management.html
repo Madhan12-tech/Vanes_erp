@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Management Panel</title>
+  <title>Management</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" />
 </head>
 <body>
@@ -14,7 +14,7 @@
       <a href="{{ url_for('progress_award') }}" class="list-group-item list-group-item-action">Progress / Award Status</a>
 
       <h5 class="mt-4 mb-2">Production</h5>
-      <a href="{{ url_for('new_project') }}" class="list-group-item list-group-item-action">New Project</a>
+      <a href="{{ url_for('project') }}" class="list-group-item list-group-item-action">New Project</a>
       <a href="{{ url_for('project_status') }}" class="list-group-item list-group-item-action">Project Status</a>
 
       <h5 class="mt-4 mb-2">Accounts</h5>
@@ -28,7 +28,7 @@
     </div>
   </div>
 
-  <!-- Modal for New Enquiry -->
+  <!-- Modal -->
   <div class="modal fade" id="newEnquiryModal" tabindex="-1" aria-labelledby="newEnquiryModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -45,6 +45,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
   <script>
     $('#newEnquiryModal').on('show.bs.modal', function () {
       $.get('/new_enquiry_form', function (data) {
