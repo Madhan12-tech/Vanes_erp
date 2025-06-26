@@ -305,6 +305,12 @@ def sales():
 def customer():
     return render_template("customer.html")
 
+@app.route('/new_enquiry')
+def new_enquiry():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+    return render_template('new_enquiry.html')
+
 
 # At the bottom of app.py
 if __name__ == '__main__':
