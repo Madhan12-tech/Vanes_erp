@@ -12,7 +12,6 @@ def init_db():
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
 
-    # Create necessary tables
     c.execute('''CREATE TABLE IF NOT EXISTS enquiry_details (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         enquiry_id TEXT,
@@ -23,13 +22,26 @@ def init_db():
         status TEXT DEFAULT 'In Progress'
     )''')
 
-    c.execute('''CREATE TABLE IF NOT EXISTS users (
+    c.execute('''CREATE TABLE IF NOT EXISTS vendors (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT,
-        password TEXT
+        vendor_id TEXT, company_name TEXT, company_address TEXT,
+        office_mobile TEXT, office_telephone TEXT, email TEXT,
+        gstin TEXT, pan TEXT, tan TEXT,
+        ben_name TEXT, ben_ac TEXT, ac_type TEXT,
+        bank_name TEXT, ifsc TEXT, micr TEXT
     )''')
 
-    # Insert default admin user if not exists
+    c.execute('''CREATE TABLE IF NOT EXISTS vendor_contacts (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        vendor_id TEXT,
+        name TEXT, dept TEXT, desg TEXT, mob TEXT
+    )''')
+
+    c.execute('''CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        username TEXT, password TEXT
+    )''')
+
     c.execute("SELECT * FROM users WHERE username='admin'")
     if not c.fetchone():
         c.execute("INSERT INTO users (username, password) VALUES (?, ?)", ('admin', 'admin123'))
@@ -37,7 +49,7 @@ def init_db():
     conn.commit()
     conn.close()
 
-# ---------- Routes ----------
+# ---------- Auth Routes ----------
 @app.route('/', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
@@ -55,6 +67,48 @@ def login():
             flash("Invalid credentials", "danger")
     return render_template('login.html')
 
+@app.route('/logout')
+def logout():
+    session.pop('username', None)
+    flash("Logged out", "info")
+    return redirect(url_for('login'))
+
+@app.route('/forgot', methods=['GET', 'POST'])
+def forgot():
+    if request.method == 'POST':
+        session['otp'] = str(random.randint(100000, 999999))
+        session['username_reset'] = request.form['username']
+        flash(f"OTP sent: {session['otp']} (simulated)", "info")
+        return redirect(url_for('verify_otp'))
+    return render_template('forgot.html')
+
+@app.route('/verify_otp', methods=['GET', 'POST'])
+def verify_otp():
+    if request.method == 'POST':
+        entered = request.form['otp']
+        if 'otp' in session and entered == session['otp']:
+            flash("OTP verified! You can reset your password.", "success")
+            return redirect(url_for('reset_password'))
+        else:
+            flash("Invalid OTP", "danger")
+    return render_template('verify_otp.html')
+
+@app.route('/reset_password', methods=['GET', 'POST'])
+def reset_password():
+    if request.method == 'POST':
+        new_pass = request.form['password']
+        username = session.get('username_reset')
+        if username:
+            conn = sqlite3.connect('database.db')
+            c = conn.cursor()
+            c.execute("UPDATE users SET password=? WHERE username=?", (new_pass, username))
+            conn.commit()
+            conn.close()
+            flash("Password updated.", "success")
+            return redirect(url_for('login'))
+    return render_template('reset_password.html')
+
+# ---------- Dashboard and Modules ----------
 @app.route('/dashboard')
 def dashboard():
     if 'username' not in session:
@@ -75,13 +129,7 @@ def management():
         return redirect(url_for('login'))
     return render_template('management.html')
 
-@app.route('/sales')
-def sales():
-    if 'username' not in session:
-        return redirect(url_for('login'))
-    return render_template('sales.html')
-
-# ---------- New Enquiry ----------
+# ---------- Enquiry Module ----------
 @app.route('/get_enquiry_id')
 def get_enquiry_id():
     conn = sqlite3.connect('database.db')
@@ -95,30 +143,21 @@ def get_enquiry_id():
 @app.route('/submit_enquiry', methods=['POST'])
 def submit_enquiry():
     data = request.form
-    enquiry_id = data.get("enquiry_id")
-    enquiry_type = data.get("enquiry_type")
-    contractor_type = data.get("contractor_type")
-    client_name = data.get("client_name")
-    project_title = data.get("project_title")
-
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute('''INSERT INTO enquiry_details (
         enquiry_id, enquiry_type, contractor_type, client_name, project_title, status
     ) VALUES (?, ?, ?, ?, ?, ?)''', (
-        enquiry_id, enquiry_type, contractor_type, client_name, project_title, 'In Progress'
-    ))
+        data['enquiry_id'], data['enquiry_type'], data['contractor_type'],
+        data['client_name'], data['project_title'], 'In Progress'))
     conn.commit()
     conn.close()
-
     return jsonify({"message": "Enquiry submitted successfully!"})
 
-# ---------- Progress / Award ----------
 @app.route('/progress-award')
 def progress_award():
     if 'username' not in session:
         return redirect(url_for('login'))
-
     conn = sqlite3.connect('database.db')
     c = conn.cursor()
     c.execute("SELECT id, enquiry_id, client_name, project_title, status FROM enquiry_details")
@@ -126,46 +165,94 @@ def progress_award():
     conn.close()
     return render_template('progress_award.html', enquiries=enquiries)
 
-# ---------- Forgot Password ----------
-@app.route('/forgot', methods=['GET', 'POST'])
-def forgot():
-    if request.method == 'POST':
-        session['otp'] = str(random.randint(100000, 999999))
-        session['username_reset'] = request.form['username']
-        flash(f"OTP sent to your email: {session['otp']} (simulated)", "info")
-        return redirect(url_for('verify_otp'))
-    return render_template('forgot.html')
+# ---------- Vendor Registration ----------
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    if 'username' not in session:
+        return redirect(url_for('login'))
 
-@app.route('/verify_otp', methods=['GET', 'POST'])
-def verify_otp():
     if request.method == 'POST':
-        entered = request.form['otp']
-        if 'otp' in session and entered == session['otp']:
-            flash("OTP verified! You can now reset your password.", "success")
-            return redirect(url_for('reset_password'))
-        else:
-            flash("Invalid OTP.", "danger")
-    return render_template('verify_otp.html')
+        form = request.form
+        vendor_data = (
+            form['vendor_id'], form['company_name'], form['company_address'],
+            form['office_mobile'], form['office_telephone'], form['email'],
+            form['gstin'], form['pan'], form['tan'],
+            form['ben_name'], form['ben_ac'], form['ac_type'],
+            form['bank_name'], form['ifsc'], form['micr']
+        )
 
-@app.route('/reset_password', methods=['GET', 'POST'])
-def reset_password():
-    if request.method == 'POST':
-        new_pass = request.form['password']
-        username = session.get('username_reset')
-        if username:
-            conn = sqlite3.connect('database.db')
-            c = conn.cursor()
-            c.execute("UPDATE users SET password=? WHERE username=?", (new_pass, username))
-            conn.commit()
-            conn.close()
-            flash("Password updated. Please login.", "success")
-            return redirect(url_for('login'))
-        else:
-            flash("Session expired. Try again.", "danger")
-            return redirect(url_for('forgot'))
-    return render_template('reset_password.html')
+        conn = sqlite3.connect('database.db')
+        c = conn.cursor()
+        c.execute('''INSERT INTO vendors (
+            vendor_id, company_name, company_address, office_mobile,
+            office_telephone, email, gstin, pan, tan,
+            ben_name, ben_ac, ac_type, bank_name, ifsc, micr
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', vendor_data)
 
-# ---------- Other Module Placeholders ----------
+        vendor_id = form['vendor_id']
+        names = request.form.getlist('contact_name[]')
+        depts = request.form.getlist('contact_dept[]')
+        desigs = request.form.getlist('contact_desg[]')
+        mobs = request.form.getlist('contact_mob[]')
+
+        for name, dept, desg, mob in zip(names, depts, desigs, mobs):
+            c.execute('''INSERT INTO vendor_contacts (vendor_id, name, dept, desg, mob)
+                         VALUES (?, ?, ?, ?, ?)''', (vendor_id, name, dept, desg, mob))
+
+        conn.commit()
+        conn.close()
+        flash('Vendor registered successfully!', 'success')
+        return redirect(url_for('register'))
+
+    return render_template('register.html')
+
+@app.route('/vendors')
+def vendors():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM vendors")
+    vendors = c.fetchall()
+    conn.close()
+    return render_template("vendors.html", vendors=vendors)
+
+@app.route('/export')
+def export():
+    if 'username' not in session:
+        return redirect(url_for('login'))
+
+    conn = sqlite3.connect('database.db')
+    c = conn.cursor()
+    c.execute("SELECT * FROM vendors")
+    vendors = c.fetchall()
+    c.execute("SELECT * FROM vendor_contacts")
+    contacts = c.fetchall()
+    conn.close()
+
+    wb = openpyxl.Workbook()
+    ws1 = wb.active
+    ws1.title = "Vendors"
+    ws1.append([
+        "ID", "Vendor ID", "Company Name", "Company Address", "Office Mobile",
+        "Office Telephone", "Email", "GSTIN", "PAN", "TAN",
+        "Beneficiary Name", "Account Number", "Account Type", "Bank Name", "IFSC", "MICR"
+    ])
+    for row in vendors:
+        ws1.append(row)
+
+    ws2 = wb.create_sheet("Contacts")
+    ws2.append(["ID", "Vendor ID", "Name", "Department", "Designation", "Mobile"])
+    for row in contacts:
+        ws2.append(row)
+
+    output = BytesIO()
+    wb.save(output)
+    output.seek(0)
+    return send_file(output, as_attachment=True, download_name="vendors.xlsx", mimetype='application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')
+
+# ---------- Placeholder Routes ----------
 @app.route('/accounts')
 def accounts():
     return render_template("accounts.html")
@@ -178,17 +265,16 @@ def project():
 def production():
     return render_template("production.html")
 
+@app.route('/sales')
+def sales():
+    return render_template("sales.html")
+
 @app.route('/customer')
 def customer():
     return render_template("customer.html")
 
-@app.route('/logout')
-def logout():
-    session.pop('username', None)
-    flash("Logged out", "info")
-    return redirect(url_for('login'))
-
-# ---------- Run ----------
+# ---------- Start ----------
 if __name__ == '__main__':
     init_db()
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=10000)
+    
